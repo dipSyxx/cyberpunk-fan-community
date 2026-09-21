@@ -23,7 +23,7 @@ export function NightCity() {
             activeLabel="District saved"
             initialCount={854}
             label="Save district"
-            storageKey="district:japantown:hero"
+            storageKey="district:japantown"
             symbol="＋"
           />
         </div>
@@ -42,32 +42,34 @@ export function NightCity() {
         </header>
 
         <section aria-label="Night City districts" className="district-grid">
-          {districts.map((district) => (
-            <article className="district-card" key={district.id}>
-              <div className="district-card__image-wrap">
-                <img
-                  alt={district.imageAlt}
-                  src={district.image}
-                  style={{ objectPosition: district.imagePosition }}
-                />
-                <span>{district.zone}</span>
-              </div>
-              <div className="district-card__body">
-                <div>
-                  <p className="eyebrow">District file</p>
-                  <h2>{district.name}</h2>
+          {districts
+            .filter((district) => district.id !== 'japantown')
+            .map((district) => (
+              <article className="district-card" key={district.id}>
+                <div className="district-card__image-wrap">
+                  <img
+                    alt={district.imageAlt}
+                    src={district.image}
+                    style={{ objectPosition: district.imagePosition }}
+                  />
+                  <span>{district.zone}</span>
                 </div>
-                <p>{district.description}</p>
-                <ReactionButton
-                  activeLabel="Saved"
-                  initialCount={district.saves}
-                  label="Save district"
-                  storageKey={`district:${district.id}`}
-                  symbol="＋"
-                />
-              </div>
-            </article>
-          ))}
+                <div className="district-card__body">
+                  <div>
+                    <p className="eyebrow">District file</p>
+                    <h2>{district.name}</h2>
+                  </div>
+                  <p>{district.description}</p>
+                  <ReactionButton
+                    activeLabel="Saved"
+                    initialCount={district.saves}
+                    label="Save district"
+                    storageKey={`district:${district.id}`}
+                    symbol="＋"
+                  />
+                </div>
+              </article>
+            ))}
         </section>
       </div>
     </>

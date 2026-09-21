@@ -102,17 +102,6 @@
     min-height: 17rem;
   }
 
-  .district-card:first-child {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-  }
-
-  .district-card:first-child .district-card__image-wrap {
-    height: 100%;
-    min-height: 23rem;
-  }
-
   .community-intro {
     flex-direction: row;
     align-items: flex-end;
