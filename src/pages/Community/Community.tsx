@@ -46,7 +46,6 @@ export function Community() {
 
   return (
     <div className="figma-page figma-page--community">
-      <span className="community-top-accent desktop-only" aria-hidden="true" />
       <header className="page-title community-heading">
         <h1 className="glitch-heading glitch-heading--yellow">Community</h1>
         <p>

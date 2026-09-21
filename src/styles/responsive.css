@@ -621,11 +621,11 @@
   .community-heading .button {
     width: 11.25rem;
     min-height: 3rem;
-    margin-top: 1.25rem;
+    margin-top: 0;
     grid-column: 2;
     grid-row: 1 / span 2;
-    align-self: start;
-    padding: 0.8125rem 1.25rem;
+    align-self: center;
+    padding: 0 1.25rem;
     font-size: 0.875rem;
   }
 
