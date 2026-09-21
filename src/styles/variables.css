@@ -1,0 +1,22 @@
+:root {
+  --color-black: #07090b;
+  --color-charcoal: #11161a;
+  --color-surface: #171d21;
+  --color-surface-light: #20282d;
+  --color-line: #2e3d45;
+  --color-yellow: #fcee09;
+  --color-yellow-soft: #d7cc18;
+  --color-cyan: #00f0ff;
+  --color-cyan-soft: #56d5eb;
+  --color-white: #f5f7f8;
+  --color-muted: #9aa4aa;
+  --color-red: #ff3157;
+
+  --font-display: 'Rajdhani', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --content-width: 76rem;
+  --header-height: 4.5rem;
+  --radius-small: 0.4rem;
+  --radius-medium: 0.85rem;
+  --radius-large: 1.25rem;
+}
