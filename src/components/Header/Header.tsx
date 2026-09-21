@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
 
 const navigationItems = [
@@ -9,10 +9,13 @@ const navigationItems = [
   { to: '/community', label: 'Community', end: false },
 ]
 
+const desktopNavigationItems = navigationItems.filter(
+  (item) => item.to !== '/community',
+)
+
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const closeMenu = useCallback(() => setMenuOpen(false), [])
-  const { pathname } = useLocation()
 
   return (
     <>
@@ -23,11 +26,11 @@ export function Header() {
         <div className="site-header__inner">
           <NavLink aria-label="Cyberpunk community home" className="brand" to="/">
             <span>Cyberpunk</span>
-            <span className="brand__desktop-suffix"> 2077</span>
+            <span className="brand__desktop-suffix">2077</span>
           </NavLink>
 
           <nav aria-label="Primary navigation" className="desktop-navigation">
-            {navigationItems.map((item) => (
+            {desktopNavigationItems.map((item) => (
               <NavLink
                 className={({ isActive }) =>
                   isActive ? 'is-active' : undefined
@@ -39,9 +42,14 @@ export function Header() {
                 {item.label}
               </NavLink>
             ))}
-            {pathname === '/' ? (
-              <span className="desktop-sign-in">Sign in</span>
-            ) : null}
+            <NavLink
+              className={({ isActive }) =>
+                `desktop-navigation__cta${isActive ? ' is-active' : ''}`
+              }
+              to="/community"
+            >
+              Community
+            </NavLink>
           </nav>
 
           <button
