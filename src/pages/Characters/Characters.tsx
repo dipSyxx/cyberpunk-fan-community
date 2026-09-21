@@ -8,9 +8,7 @@ export function Characters() {
     <div className="figma-page figma-page--characters">
       <header className="page-title">
         <h1 className="glitch-heading glitch-heading--yellow">Characters</h1>
-        <p>
-          Meet the people shaping Night City<span className="desktop-only"> and vote for your favorites</span>.
-        </p>
+        <p>Meet the people shaping Night City and vote for your favorites.</p>
       </header>
 
       <section aria-label="Character profiles" className="character-grid">
@@ -20,10 +18,7 @@ export function Characters() {
       </section>
 
       <section className="favorite-prompt">
-        <h2 className="section-label section-label--white">
-          <span className="mobile-only">Who is your favorite?</span>
-          <span className="desktop-only">Fan favorites</span>
-        </h2>
+        <h2 className="section-label section-label--white">Fan favorites</h2>
         <div className="favorite-prompt__reactions">
           <ReactionButton
             activeLabel="Johnny"
@@ -42,7 +37,6 @@ export function Characters() {
           />
           <ReactionButton
             activeLabel="Panam"
-            className="desktop-only"
             compactCount
             initialCount={1700}
             label="Panam"
@@ -51,7 +45,7 @@ export function Characters() {
         </div>
       </section>
 
-      <section aria-label="Character insights" className="character-insights desktop-only">
+      <section aria-label="Character insights" className="character-insights">
         <article className="character-insight character-insight--cyan">
           <h2>Filter by role</h2>
           <p>Merc · Fixer · Rockerboy · Netrunner</p>

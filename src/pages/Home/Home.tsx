@@ -1,9 +1,7 @@
 import { Link } from 'react-router-dom'
 import nightCityImage from '../../assets/images/night-city.png'
 import { LinkButton } from '../../components/Button/Button'
-import { DiscussionCard } from '../../components/DiscussionCard/DiscussionCard'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
-import { trendingDiscussion } from '../../data/discussions'
 
 export function Home() {
   return (
@@ -20,11 +18,7 @@ export function Home() {
 
       <section className="home-copy">
         <h1 className="glitch-heading">Wake up, samurai</h1>
-        <p className="mobile-only">
-          Explore characters, districts and stories — then join the community
-          and share your take.
-        </p>
-        <p className="desktop-only">
+        <p>
           Explore Night City, its characters and stories — then join
           discussions with other players.
         </p>
@@ -32,30 +26,25 @@ export function Home() {
       </section>
 
       <section className="featured-section">
-        <h2 className="desktop-only">Featured this week</h2>
+        <h2>Featured this week</h2>
         <nav aria-label="Featured this week" className="featured-cyber">
           <Link className="featured-cyber__card featured-cyber__card--yellow" to="/characters">
-            <strong><span className="mobile-only">Johnny</span><span className="desktop-only">Johnny Silverhand</span></strong>
-            <span><span className="mobile-only">Legend</span><span className="desktop-only">Rockerboy · Rebel</span></span>
+            <strong>Johnny Silverhand</strong>
+            <span>Rockerboy · Rebel</span>
           </Link>
           <Link className="featured-cyber__card featured-cyber__card--red" to="/characters">
-            <strong><span className="mobile-only">Judy</span><span className="desktop-only">Judy Alvarez</span></strong>
-            <span><span className="mobile-only">Braindance</span><span className="desktop-only">Braindance · Mox</span></span>
+            <strong>Judy Alvarez</strong>
+            <span>Braindance · Mox</span>
           </Link>
-          <Link className="featured-cyber__card featured-cyber__card--cyan desktop-only" to="/night-city">
+          <Link className="featured-cyber__card featured-cyber__card--cyan" to="/night-city">
             <strong>Japantown</strong>
             <span>Westbrook · Neon</span>
           </Link>
-          <Link className="featured-cyber__card featured-cyber__card--yellow desktop-only" to="/community">
+          <Link className="featured-cyber__card featured-cyber__card--yellow" to="/community">
             <strong>Community</strong>
             <span>2.8K discussions</span>
           </Link>
         </nav>
-      </section>
-
-      <section className="home-trending">
-        <h2 className="section-label">Trending discussion</h2>
-        <DiscussionCard discussion={trendingDiscussion} variant="trending" />
       </section>
 
       <PageMarker index="01" label="Home" />

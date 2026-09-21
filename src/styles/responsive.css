@@ -37,6 +37,10 @@
     height: clamp(8.25rem, 24vw, 11rem);
   }
 
+  .community-sidebar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .district-card,
   .discussion-card {
     height: clamp(8.25rem, 22vw, 10rem);
@@ -62,14 +66,6 @@
     width: min(100%, var(--content-width));
     min-height: 64rem;
     border-radius: 0;
-  }
-
-  .mobile-only {
-    display: none !important;
-  }
-
-  .desktop-only {
-    display: revert !important;
   }
 
   .site-header {
@@ -120,11 +116,6 @@
     background: var(--color-yellow);
     box-shadow: 0.375rem 0 0 var(--color-red);
     content: '';
-  }
-
-  .brand__desktop-suffix {
-    display: inline !important;
-    margin-left: 0.25rem;
   }
 
   .menu-button {
@@ -304,10 +295,6 @@
     gap: 1.125rem;
   }
 
-  .featured-cyber__card.desktop-only {
-    display: flex !important;
-  }
-
   .featured-cyber__card {
     height: 9.375rem;
     padding: 1.125rem;
@@ -321,10 +308,6 @@
 
   .featured-cyber__card > span {
     font-size: 0.8125rem;
-  }
-
-  .home-trending {
-    display: none;
   }
 
   .figma-page--home .page-marker {
@@ -420,18 +403,10 @@
     font-size: 0.875rem;
   }
 
-  .reaction-button.desktop-only {
-    display: inline-flex !important;
-  }
-
   .character-insights {
     margin-top: 1.8125rem;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem;
-  }
-
-  .character-insights.desktop-only {
-    display: grid !important;
   }
 
   .character-insight {
@@ -556,14 +531,10 @@
     text-transform: uppercase;
   }
 
-  .district-grid--desktop {
+  .figma-page--night-city .district-grid {
     margin-top: 1.3125rem;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1.125rem;
-  }
-
-  .district-grid--desktop.desktop-only {
-    display: grid !important;
   }
 
   .district-card {
@@ -579,10 +550,6 @@
   .district-card p {
     color: #a6b2ba;
     font-size: 0.8125rem;
-  }
-
-  .district-reaction {
-    display: none;
   }
 
   .figma-page--night-city .page-marker {
@@ -663,19 +630,10 @@
     font-size: 0.875rem;
   }
 
-  .discussion-card__desktop-stats {
-    color: var(--color-yellow);
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
   .community-sidebar {
+    display: flex;
     flex-direction: column;
     gap: 1rem;
-  }
-
-  .community-sidebar.desktop-only {
-    display: flex !important;
   }
 
   .community-panel {
@@ -722,15 +680,7 @@
   }
 
   .figma-page--community .page-marker {
-    margin-top: 6.125rem;
-  }
-
-  .figma-page--community .page-marker__accent {
-    display: none;
-  }
-
-  .figma-page--community .page-marker__meta {
-    justify-self: end;
+    margin-top: 1.625rem;
   }
 
   .mobile-menu {

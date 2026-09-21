@@ -48,13 +48,9 @@ export function Community() {
     <div className="figma-page figma-page--community">
       <header className="page-title community-heading">
         <h1 className="glitch-heading glitch-heading--yellow">Community</h1>
-        <p>
-          <span className="mobile-only">Discuss quests, characters, endings and Night City life.</span>
-          <span className="desktop-only">Share theories, rate characters, discuss endings and discover what other fans are talking about.</span>
-        </p>
+        <p>Share theories, rate characters, discuss endings and discover what other fans are talking about.</p>
         <ActionButton onClick={() => dialogRef.current?.showModal()}>
-          <span className="mobile-only">+ Start discussion</span>
-          <span className="desktop-only">+ New post</span>
+          + New post
         </ActionButton>
       </header>
 
@@ -65,7 +61,7 @@ export function Community() {
           ))}
         </section>
 
-        <aside className="community-sidebar desktop-only">
+        <aside className="community-sidebar">
           <section className="community-panel community-panel--yellow">
             <h2>Community status</h2>
             <p className="community-panel__primary">2.8K discussions</p>

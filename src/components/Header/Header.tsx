@@ -25,8 +25,7 @@ export function Header() {
       <header className="site-header">
         <div className="site-header__inner">
           <NavLink aria-label="Cyberpunk community home" className="brand" to="/">
-            <span>Cyberpunk</span>
-            <span className="brand__desktop-suffix">2077</span>
+            <span>Cyberpunk 2077</span>
           </NavLink>
 
           <nav aria-label="Primary navigation" className="desktop-navigation">

@@ -29,12 +29,12 @@ export function DiscussionCard({
       ) : (
         <>
           <h2>{discussion.title}</h2>
-          <p className="discussion-card__excerpt desktop-only">
+          <p className="discussion-card__excerpt">
             {discussion.excerpt}
           </p>
         </>
       )}
-      <div className="discussion-card__actions mobile-only">
+      <div className="discussion-card__actions">
         <button
           aria-label={`${liked ? 'Unlike' : 'Like'} discussion. ${likes} likes`}
           aria-pressed={liked}
@@ -48,11 +48,6 @@ export function DiscussionCard({
           {variant === 'trending' ? 'Reply' : 'Replies'} {discussion.replies}
         </span>
       </div>
-      {variant === 'feed' ? (
-        <p className="discussion-card__desktop-stats desktop-only">
-          {likes} likes · {discussion.replies} replies
-        </p>
-      ) : null}
     </article>
   )
 }
