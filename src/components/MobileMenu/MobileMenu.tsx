@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
 interface MobileMenuProps {
   onClose: () => void
@@ -14,6 +14,7 @@ const navigationItems = [
 
 export function MobileMenu({ onClose }: MobileMenuProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const { pathname } = useLocation()
 
   useEffect(() => {
     const previousFocus = document.activeElement as HTMLElement | null
@@ -36,6 +37,34 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
 
   return (
     <div className="mobile-menu" id="mobile-navigation">
+      <div aria-hidden="true" className="cybr-btn mobile-menu__glitch">
+        <div className="cybr-btn__glitch mobile-menu__glitch-layer">
+          <div className="mobile-menu__topline">
+            <h2>Navigation</h2>
+            <span className="mobile-menu__glitch-close">Close</span>
+          </div>
+          <p className="mobile-menu__intro">Explore Night City</p>
+          <div className="mobile-menu__nav">
+            {navigationItems.map((item, index) => {
+              const isActive = item.end
+                ? pathname === item.to
+                : pathname.startsWith(item.to)
+
+              return (
+                <div
+                  className={`mobile-menu__link mobile-menu__link--${index + 1}${isActive ? ' is-active' : ''}`}
+                  key={item.to}
+                >
+                  <span>0{index + 1}</span>
+                  <strong>{item.label}</strong>
+                  <span>→</span>
+                </div>
+              )
+            })}
+          </div>
+          <p className="mobile-menu__note">Prototype menu</p>
+        </div>
+      </div>
       <div className="mobile-menu__topline">
         <h2>Navigation</h2>
         <button
