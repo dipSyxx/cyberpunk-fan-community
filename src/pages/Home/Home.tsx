@@ -2,89 +2,63 @@ import { Link } from 'react-router-dom'
 import nightCityImage from '../../assets/images/night-city.png'
 import { LinkButton } from '../../components/Button/Button'
 import { DiscussionCard } from '../../components/DiscussionCard/DiscussionCard'
-import { characters } from '../../data/characters'
-import { discussions } from '../../data/discussions'
+import { PageMarker } from '../../components/PageMarker/PageMarker'
+import { trendingDiscussion } from '../../data/discussions'
 
 export function Home() {
-  const featuredCharacters = characters.slice(1)
-
   return (
-    <>
-      <section className="hero hero--home">
+    <div className="figma-page figma-page--home">
+      <section className="media-card media-card--home">
         <img
           alt="Sunlight cutting through the towers and streets of Night City"
-          className="hero__image"
           src={nightCityImage}
         />
-        <div className="hero__scrim" />
-        <div className="content-shell hero__content">
-          <p className="eyebrow eyebrow--bright">Night City // 2077</p>
-          <h1>
-            Wake up,
-            <br />
-            <span>samurai.</span>
-          </h1>
-          <p className="hero__lede">
-            Stories, people, and street-level intel from the city that never
-            stops asking what you are willing to become.
-          </p>
-          <LinkButton to="/night-city">Explore Night City</LinkButton>
-        </div>
-        <div className="hero__data" aria-hidden="true">
-          <span>35.6762° N</span>
-          <span>Network // Online</span>
-        </div>
+        <span className="media-card__shade" aria-hidden="true" />
+        <span className="media-card__accent" aria-hidden="true" />
+        <h2>Welcome to Night City</h2>
       </section>
 
-      <section className="content-shell section-block">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Featured files</p>
-            <h2>People of Night City</h2>
-          </div>
-          <Link className="text-link" to="/characters">
-            View all characters <span aria-hidden="true">→</span>
+      <section className="home-copy">
+        <h1 className="glitch-heading">Wake up, samurai</h1>
+        <p className="mobile-only">
+          Explore characters, districts and stories — then join the community
+          and share your take.
+        </p>
+        <p className="desktop-only">
+          Explore Night City, its characters and stories — then join
+          discussions with other players.
+        </p>
+        <LinkButton to="/night-city">Explore Night City</LinkButton>
+      </section>
+
+      <section className="featured-section">
+        <h2 className="desktop-only">Featured this week</h2>
+        <nav aria-label="Featured this week" className="featured-cyber">
+          <Link className="featured-cyber__card featured-cyber__card--yellow" to="/characters">
+            <strong><span className="mobile-only">Johnny</span><span className="desktop-only">Johnny Silverhand</span></strong>
+            <span><span className="mobile-only">Legend</span><span className="desktop-only">Rockerboy · Rebel</span></span>
           </Link>
-        </div>
-
-        <div className="featured-grid">
-          {featuredCharacters.map((character) => (
-            <Link
-              aria-label={`View ${character.name} on the characters page`}
-              className="featured-character"
-              key={character.id}
-              to="/characters"
-            >
-              <img
-                alt={character.imageAlt}
-                src={character.image}
-                style={{ objectPosition: character.imagePosition }}
-              />
-              <span className="featured-character__overlay" />
-              <span className="featured-character__content">
-                <small>{character.role}</small>
-                <strong>{character.name}</strong>
-                <span>Open file ↗</span>
-              </span>
-            </Link>
-          ))}
-        </div>
+          <Link className="featured-cyber__card featured-cyber__card--red" to="/characters">
+            <strong><span className="mobile-only">Judy</span><span className="desktop-only">Judy Alvarez</span></strong>
+            <span><span className="mobile-only">Braindance</span><span className="desktop-only">Braindance · Mox</span></span>
+          </Link>
+          <Link className="featured-cyber__card featured-cyber__card--cyan desktop-only" to="/night-city">
+            <strong>Japantown</strong>
+            <span>Westbrook · Neon</span>
+          </Link>
+          <Link className="featured-cyber__card featured-cyber__card--yellow desktop-only" to="/community">
+            <strong>Community</strong>
+            <span>2.8K discussions</span>
+          </Link>
+        </nav>
       </section>
 
-      <section className="section-block section-block--surface">
-        <div className="content-shell">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Live feed</p>
-              <h2>Trending discussion</h2>
-            </div>
-            <Link className="text-link" to="/community">
-              Enter community <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-          <DiscussionCard discussion={discussions[0]} />
-        </div>
+      <section className="home-trending">
+        <h2 className="section-label">Trending discussion</h2>
+        <DiscussionCard discussion={trendingDiscussion} variant="trending" />
       </section>
-    </>
+
+      <PageMarker index="01" label="Home" />
+    </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
 
 const navigationItems = [
@@ -12,6 +12,7 @@ const navigationItems = [
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const closeMenu = useCallback(() => setMenuOpen(false), [])
+  const { pathname } = useLocation()
 
   return (
     <>
@@ -20,12 +21,9 @@ export function Header() {
       </a>
       <header className="site-header">
         <div className="site-header__inner">
-          <NavLink aria-label="Afterlife community home" className="brand" to="/">
-            <span className="brand__mark" aria-hidden="true">77</span>
-            <span>
-              <strong>Afterlife</strong>
-              <small>Night City network</small>
-            </span>
+          <NavLink aria-label="Cyberpunk community home" className="brand" to="/">
+            <span>Cyberpunk</span>
+            <span className="brand__desktop-suffix"> 2077</span>
           </NavLink>
 
           <nav aria-label="Primary navigation" className="desktop-navigation">
@@ -41,6 +39,9 @@ export function Header() {
                 {item.label}
               </NavLink>
             ))}
+            {pathname === '/' ? (
+              <span className="desktop-sign-in">Sign in</span>
+            ) : null}
           </nav>
 
           <button
@@ -51,8 +52,7 @@ export function Header() {
             onClick={() => setMenuOpen(true)}
             type="button"
           >
-            <span>Menu</span>
-            <span aria-hidden="true">☰</span>
+            Menu
           </button>
         </div>
       </header>

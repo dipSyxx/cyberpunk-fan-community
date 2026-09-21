@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from './components/Header/Header'
-import { PageFooter } from './components/PageFooter/PageFooter'
 import { Characters } from './pages/Characters/Characters'
 import { Community } from './pages/Community/Community'
 import { Home } from './pages/Home/Home'
@@ -21,17 +20,18 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Header />
-      <main id="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/characters" element={<Characters />} />
-          <Route path="/night-city" element={<NightCity />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-      <PageFooter />
+      <div className="app-frame">
+        <Header />
+        <main id="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/characters" element={<Characters />} />
+            <Route path="/night-city" element={<NightCity />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
     </BrowserRouter>
   )
 }

@@ -37,22 +37,23 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
   return (
     <div className="mobile-menu" id="mobile-navigation">
       <div className="mobile-menu__topline">
-        <p>Navigation // 01</p>
+        <h2>Navigation</h2>
         <button
           aria-label="Close navigation menu"
-          className="icon-button"
+          className="mobile-menu__close"
           onClick={onClose}
           ref={closeButtonRef}
           type="button"
         >
-          <span aria-hidden="true">×</span>
+          Close
         </button>
       </div>
+      <p className="mobile-menu__intro">Explore Night City</p>
       <nav aria-label="Mobile navigation" className="mobile-menu__nav">
         {navigationItems.map((item, index) => (
           <NavLink
             className={({ isActive }) =>
-              `mobile-menu__link${isActive ? ' is-active' : ''}`
+              `mobile-menu__link mobile-menu__link--${index + 1}${isActive ? ' is-active' : ''}`
             }
             end={item.end}
             key={item.to}
@@ -60,13 +61,12 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             to={item.to}
           >
             <span aria-hidden="true">0{index + 1}</span>
-            {item.label}
+            <strong>{item.label}</strong>
+            <span aria-hidden="true">→</span>
           </NavLink>
         ))}
       </nav>
-      <p className="mobile-menu__status">
-        <span aria-hidden="true" /> Network status: connected
-      </p>
+      <p className="mobile-menu__note">Prototype menu</p>
     </div>
   )
 }

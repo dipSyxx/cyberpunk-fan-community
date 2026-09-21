@@ -1,6 +1,7 @@
-import { useRef } from 'react'
+import { useRef, type FormEvent } from 'react'
 import { ActionButton } from '../../components/Button/Button'
 import { DiscussionCard } from '../../components/DiscussionCard/DiscussionCard'
+import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { discussions, type Discussion } from '../../data/discussions'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 
@@ -14,7 +15,7 @@ export function Community() {
     LocalDiscussion[]
   >('cyberpunk:local-discussions', [])
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = event.currentTarget
     const formData = new FormData(form)
@@ -33,6 +34,7 @@ export function Community() {
         tag: 'Community',
         likes: 0,
         replies: 0,
+        accent: 'cyan',
         createdLocally: true,
       },
       ...current,
@@ -43,56 +45,66 @@ export function Community() {
   }
 
   return (
-    <div className="page-shell content-shell">
-      <header className="community-intro">
-        <div>
-          <p className="eyebrow">Afterlife terminal // Live</p>
-          <h1>Community feed</h1>
-          <p>
-            Trade theories, compare builds, and share the Night City stories
-            that still live rent-free in your chrome.
-          </p>
-        </div>
+    <div className="figma-page figma-page--community">
+      <span className="community-top-accent desktop-only" aria-hidden="true" />
+      <header className="page-title community-heading">
+        <h1 className="glitch-heading glitch-heading--yellow">Community</h1>
+        <p>
+          <span className="mobile-only">Discuss quests, characters, endings and Night City life.</span>
+          <span className="desktop-only">Share theories, rate characters, discuss endings and discover what other fans are talking about.</span>
+        </p>
         <ActionButton onClick={() => dialogRef.current?.showModal()}>
-          <span aria-hidden="true">＋</span> Start discussion
+          <span className="mobile-only">+ Start discussion</span>
+          <span className="desktop-only">+ New post</span>
         </ActionButton>
       </header>
 
-      <div className="community-stats" aria-label="Community statistics">
-        <p>
-          <strong>12.8K</strong>
-          <span>Mercs online</span>
-        </p>
-        <p>
-          <strong>{discussions.length + localDiscussions.length}</strong>
-          <span>Active threads</span>
-        </p>
-        <p>
-          <strong>NC</strong>
-          <span>Local time 02:17</span>
-        </p>
+      <div className="community-layout">
+        <section aria-label="Community discussions" className="discussion-list">
+          {[...localDiscussions, ...discussions].map((discussion) => (
+            <DiscussionCard discussion={discussion} key={discussion.id} />
+          ))}
+        </section>
+
+        <aside className="community-sidebar desktop-only">
+          <section className="community-panel community-panel--yellow">
+            <h2>Community status</h2>
+            <p className="community-panel__primary">2.8K discussions</p>
+            <p>14.2K reactions this week</p>
+            <p className="community-panel__online">438 fans online</p>
+          </section>
+          <section className="community-panel community-panel--cyan">
+            <h2>Trending</h2>
+            <p># Phantom Liberty</p>
+            <p># Favorite endings</p>
+            <p># Best builds</p>
+            <p># Night City photos</p>
+          </section>
+          <section className="community-panel community-panel--red">
+            <h2>Community rules</h2>
+            <p>01&nbsp;&nbsp; Respect other fans</p>
+            <p>02&nbsp;&nbsp; Mark story spoilers</p>
+            <p>03&nbsp;&nbsp; Keep discussions relevant</p>
+          </section>
+        </aside>
       </div>
 
-      <section aria-label="Community discussions" className="discussion-list">
-        {[...localDiscussions, ...discussions].map((discussion) => (
-          <DiscussionCard discussion={discussion} key={discussion.id} />
-        ))}
-      </section>
+      <PageMarker index="04" label="Community" />
 
       <dialog className="discussion-dialog" ref={dialogRef}>
         <form onSubmit={handleSubmit}>
           <div className="discussion-dialog__heading">
             <div>
-              <p className="eyebrow">New transmission</p>
+              <p className="dialog-kicker">New transmission</p>
               <h2>Start a discussion</h2>
             </div>
             <button
               aria-label="Close discussion form"
-              className="icon-button"
+              className="dialog-close"
               onClick={() => dialogRef.current?.close()}
               type="button"
             >
-              <span aria-hidden="true">×</span>
+              Close
             </button>
           </div>
           <p className="discussion-dialog__note">

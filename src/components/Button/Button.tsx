@@ -12,9 +12,15 @@ export function LinkButton({
   children,
 }: LinkButtonProps) {
   return (
-    <Link className={`button button--${variant}`} to={to}>
+    <Link className={`button cybr-btn button--${variant}`} to={to}>
       <span>{children}</span>
-      <span aria-hidden="true">↗</span>
+      <span aria-hidden="true">_</span>
+      <span aria-hidden="true" className="cybr-btn__glitch">
+        {children}_
+      </span>
+      <span aria-hidden="true" className="cybr-btn__tag">
+        R25
+      </span>
     </Link>
   )
 }
@@ -31,11 +37,18 @@ export function ActionButton({
 }: ActionButtonProps) {
   return (
     <button
-      className={`button button--${variant} ${className}`.trim()}
+      className={`button cybr-btn button--${variant} ${className}`.trim()}
       type="button"
       {...props}
     >
-      {children}
+      <span>{children}</span>
+      <span aria-hidden="true">_</span>
+      <span aria-hidden="true" className="cybr-btn__glitch">
+        {children}_
+      </span>
+      <span aria-hidden="true" className="cybr-btn__tag">
+        R25
+      </span>
     </button>
   )
 }

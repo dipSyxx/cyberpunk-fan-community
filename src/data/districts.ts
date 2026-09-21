@@ -27,8 +27,7 @@ export const districts: District[] = [
     id: 'watson',
     name: 'Watson',
     zone: 'Northside',
-    description:
-      'Old industry, dense streets, and ambitious mercs starting from the bottom.',
+    description: 'Dense streets, markets and megabuildings.',
     image: nightCityImage,
     imageAlt: 'Night City streets and high-rise buildings in daylight',
     saves: 672,
@@ -38,8 +37,7 @@ export const districts: District[] = [
     id: 'pacifica',
     name: 'Pacifica',
     zone: 'Coastview',
-    description:
-      'An abandoned resort district where broken promises became a new kind of freedom.',
+    description: 'Abandoned luxury, gangs and broken promises.',
     image: nightCityImage,
     imageAlt: 'Sunlit Night City skyline viewed from street level',
     saves: 519,

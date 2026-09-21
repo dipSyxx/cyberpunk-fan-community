@@ -6,7 +6,7 @@ A responsive, mobile-first fan community built from the project’s Figma resear
 
 - [Figma assignment](https://www.figma.com/design/slXSaiblxbcMCKsL8uxPji/Cyberpunk-2077-Fan-Community-%E2%80%94-2INF-Figma-Assignment?node-id=0-1)
 - Visual system: dark surfaces, Cyberpunk yellow, cyan accents, Rajdhani display type, and Inter body type
-- The current Figma file exposes the research/UX board. The four application views follow its verified design decisions and the supplied implementation brief.
+- The mobile implementation follows the four supplied Figma frames (`1:169`, `1:193`, `1:218`, `1:247`) and the menu overlay (`14:72`).
 
 ## Tech
 
@@ -21,8 +21,7 @@ A responsive, mobile-first fan community built from the project’s Figma resear
 
 - Four routes: Home, Characters, Night City, and Community
 - Responsive desktop navigation and keyboard-accessible mobile menu
-- Character favorites with an “All / Favorites” filter
-- Saved districts and community reactions
+- Character reactions, district saving, and community likes
 - Locally created community discussions
 - Active navigation states and persistent reactions across refreshes
 - Semantic page structure, descriptive image text, visible focus states, and reduced-motion support

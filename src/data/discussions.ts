@@ -7,40 +7,57 @@ export interface Discussion {
   tag: string
   likes: number
   replies: number
+  accent?: 'cyan' | 'red' | 'yellow'
+}
+
+export const trendingDiscussion: Discussion = {
+  id: 'best-district-at-night',
+  title: 'Best district at night',
+  excerpt:
+    'Which district has the best atmosphere at night? For me it is Japantown.',
+  author: 'netrunner77',
+  time: '12 min',
+  tag: 'Night City',
+  likes: 42,
+  replies: 8,
+  accent: 'cyan',
 }
 
 export const discussions: Discussion[] = [
   {
-    id: 'phantom-liberty-ending',
-    title: 'Which Phantom Liberty ending stayed with you?',
+    id: 'hardest-ending',
+    title: 'Which ending hit you the hardest?',
     excerpt:
-      'No wrong answers—just tag the major spoilers. I keep returning to the quiet choices after the final mission.',
-    author: 'netrunner_77',
+      'I keep coming back to the Star ending. The contrast between Night City and freedom outside the walls is brutal.',
+    author: 'netrunner77',
     time: '12 min ago',
     tag: 'Story',
     likes: 128,
     replies: 34,
+    accent: 'cyan',
   },
   {
-    id: 'best-night-city-build',
-    title: 'Your most fun build for roaming Night City',
+    id: 'screenshot-locations',
+    title: 'Best place for screenshots in Night City?',
     excerpt:
-      'Forget the meta for a minute. What combination of cyberware and weapons creates the best moment-to-moment chaos?',
-    author: 'chrome_heart',
+      'Japantown at night is unbeatable, but the Badlands at sunrise deserves more love.',
+    author: 'mox_judy',
     time: '48 min ago',
-    tag: 'Builds',
+    tag: 'Night City',
     likes: 96,
-    replies: 27,
+    replies: 21,
+    accent: 'red',
   },
   {
-    id: 'favorite-district-details',
-    title: 'Small district details most players miss',
+    id: 'johnny-hero-villain',
+    title: 'Johnny: hero, villain, or both?',
     excerpt:
-      'Post the signs, alleys, NPC routines, and strange corners that made the city feel alive to you.',
-    author: 'afterlife_local',
+      'He is selfish, charismatic and destructive — but that is exactly why the character works so well.',
+    author: 'samurai_fan',
     time: '2 hr ago',
-    tag: 'Night City',
-    likes: 211,
-    replies: 51,
+    tag: 'Characters',
+    likes: 241,
+    replies: 67,
+    accent: 'yellow',
   },
 ]

@@ -1,81 +1,68 @@
-import { useMemo, useState } from 'react'
 import { CharacterCard } from '../../components/CharacterCard/CharacterCard'
+import { PageMarker } from '../../components/PageMarker/PageMarker'
+import { ReactionButton } from '../../components/ReactionButton/ReactionButton'
 import { characters } from '../../data/characters'
-import { useLocalStorage } from '../../hooks/useLocalStorage'
-
-type CharacterFilter = 'all' | 'favorites'
 
 export function Characters() {
-  const [filter, setFilter] = useState<CharacterFilter>('all')
-  const [favorites, setFavorites] = useLocalStorage<string[]>(
-    'cyberpunk:favorite-characters',
-    [],
-  )
-
-  const visibleCharacters = useMemo(
-    () =>
-      filter === 'favorites'
-        ? characters.filter((character) => favorites.includes(character.id))
-        : characters,
-    [favorites, filter],
-  )
-
-  const toggleFavorite = (id: string) => {
-    setFavorites((current) =>
-      current.includes(id)
-        ? current.filter((favoriteId) => favoriteId !== id)
-        : [...current, id],
-    )
-  }
-
   return (
-    <div className="page-shell content-shell">
-      <header className="page-intro">
-        <p className="eyebrow">Database // Character archive</p>
-        <h1>Night City legends</h1>
+    <div className="figma-page figma-page--characters">
+      <header className="page-title">
+        <h1 className="glitch-heading glitch-heading--yellow">Characters</h1>
         <p>
-          Mercs, rebels, and dreamers who refuse to let the city write their
-          final chapter.
+          Meet the people shaping Night City<span className="desktop-only"> and vote for your favorites</span>.
         </p>
       </header>
 
-      <div aria-label="Filter characters" className="filter-bar" role="group">
-        <button
-          aria-pressed={filter === 'all'}
-          className={filter === 'all' ? 'is-active' : undefined}
-          onClick={() => setFilter('all')}
-          type="button"
-        >
-          All files <span>{characters.length}</span>
-        </button>
-        <button
-          aria-pressed={filter === 'favorites'}
-          className={filter === 'favorites' ? 'is-active' : undefined}
-          onClick={() => setFilter('favorites')}
-          type="button"
-        >
-          Favorites <span>{favorites.length}</span>
-        </button>
-      </div>
+      <section aria-label="Character profiles" className="character-grid">
+        {characters.map((character) => (
+          <CharacterCard character={character} key={character.id} />
+        ))}
+      </section>
 
-      {visibleCharacters.length > 0 ? (
-        <section aria-label="Character profiles" className="character-grid">
-          {visibleCharacters.map((character) => (
-            <CharacterCard
-              character={character}
-              isFavorite={favorites.includes(character.id)}
-              key={character.id}
-              onToggleFavorite={toggleFavorite}
-            />
-          ))}
-        </section>
-      ) : (
-        <div className="empty-state">
-          <p className="eyebrow">No saved files</p>
-          <h2>Your favorites list is empty.</h2>
-          <p>Choose “All files” and select the star on a character profile.</p>
+      <section className="favorite-prompt">
+        <h2 className="section-label section-label--white">
+          <span className="mobile-only">Who is your favorite?</span>
+          <span className="desktop-only">Fan favorites</span>
+        </h2>
+        <div className="favorite-prompt__reactions">
+          <ReactionButton
+            activeLabel="Johnny"
+            compactCount
+            initialCount={2400}
+            label="Johnny"
+            storageKey="character:johnny-silverhand"
+          />
+          <ReactionButton
+            activeLabel="Judy"
+            compactCount
+            initialCount={1900}
+            label="Judy"
+            storageKey="character:judy-alvarez"
+            symbol="★"
+          />
+          <ReactionButton
+            activeLabel="Panam"
+            className="desktop-only"
+            compactCount
+            initialCount={1700}
+            label="Panam"
+            storageKey="character:panam-palmer"
+          />
         </div>
-      )}
+      </section>
+
+      <section aria-label="Character insights" className="character-insights desktop-only">
+        <article className="character-insight character-insight--cyan">
+          <h2>Filter by role</h2>
+          <p>Merc · Fixer · Rockerboy · Netrunner</p>
+        </article>
+        <article className="character-insight character-insight--red">
+          <h2>Community rating</h2>
+          <p>4.8 / 5 average character rating</p>
+        </article>
+      </section>
+
+      <PageMarker index="02" label="Characters" />
     </div>
   )
 }
