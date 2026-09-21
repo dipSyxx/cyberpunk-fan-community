@@ -1,32 +1,69 @@
-# React + TypeScript + Vite
+# Cyberpunk 2077 Fan Community
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A responsive, mobile-first fan community built from the project’s Figma research and UX direction.
 
-Currently, two official plugins are available:
+## Design
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [Figma assignment](https://www.figma.com/design/slXSaiblxbcMCKsL8uxPji/Cyberpunk-2077-Fan-Community-%E2%80%94-2INF-Figma-Assignment?node-id=0-1)
+- Visual system: dark surfaces, Cyberpunk yellow, cyan accents, Rajdhani display type, and Inter body type
+- The current Figma file exposes the research/UX board. The four application views follow its verified design decisions and the supplied implementation brief.
 
-## React Compiler
+## Tech
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- TypeScript
+- Vite
+- React Router
+- CSS with custom properties, Flexbox, Grid, and media queries
+- `localStorage` for browser-only persistence
 
-## Expanding the Oxlint configuration
+## Features
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+- Four routes: Home, Characters, Night City, and Community
+- Responsive desktop navigation and keyboard-accessible mobile menu
+- Character favorites with an “All / Favorites” filter
+- Saved districts and community reactions
+- Locally created community discussions
+- Active navigation states and persistent reactions across refreshes
+- Semantic page structure, descriptive image text, visible focus states, and reduced-motion support
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Run locally
+
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Production checks:
+
+```bash
+npm run lint
+npm run build
+```
+
+## Project structure
+
+```text
+src/
+├── assets/images/
+├── components/
+├── data/
+├── hooks/
+├── pages/
+├── styles/
+├── App.tsx
+└── main.tsx
+```
+
+## Image credits
+
+Images are downloaded from the official sources linked in the Figma research board:
+
+- [CD PROJEKT RED press center](https://press.cdprojektred.com/)
+- [Cyberpunk 2077 official site](https://www.cyberpunk.net/)
+
+This is an unofficial, non-commercial school project. Cyberpunk 2077 and its characters belong to CD PROJEKT RED.
+
+## Scope
+
+The project intentionally has no backend, authentication, database, real-time comments, or admin panel. Static data is isolated under `src/data`, making a later API integration straightforward.
