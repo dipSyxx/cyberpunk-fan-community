@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { CharacterCard } from '../../components/CharacterCard/CharacterCard'
+import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { ReactionButton } from '../../components/ReactionButton/ReactionButton'
 import { characters, type Character } from '../../data/characters'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { useTransientStatus } from '../../hooks/useTransientStatus'
 
 type CharacterFilter = 'all' | 'favorites' | Character['category']
 
@@ -25,6 +27,7 @@ export function Characters() {
     'cyberpunk:character-rating',
     0,
   )
+  const { status, showStatus } = useTransientStatus()
 
   const visibleCharacters = useMemo(() => {
     if (filter === 'favorites') {
@@ -36,11 +39,22 @@ export function Characters() {
   }, [favorites, filter])
 
   const toggleFavorite = (id: string) => {
+    const character = characters.find((item) => item.id === id)
+    const isFavorite = favorites.includes(id)
+
     setFavorites((current) =>
       current.includes(id)
         ? current.filter((favoriteId) => favoriteId !== id)
         : [...current, id],
     )
+
+    if (character) {
+      showStatus(
+        isFavorite
+          ? `${character.name} removed from Your Night City`
+          : `${character.name} added to Your Night City`,
+      )
+    }
   }
 
   return (
@@ -122,7 +136,10 @@ export function Characters() {
                 aria-checked={rating === value}
                 className={value <= rating ? 'is-active' : undefined}
                 key={value}
-                onClick={() => setRating(value)}
+                onClick={() => {
+                  setRating(value)
+                  showStatus(`Your rating: ${value} / 5`)
+                }}
                 role="radio"
                 type="button"
               >
@@ -135,6 +152,7 @@ export function Characters() {
       </section>
 
       <PageMarker index="02" label="Characters" />
+      <InteractionStatus status={status} />
     </div>
   )
 }

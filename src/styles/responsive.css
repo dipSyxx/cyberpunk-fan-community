@@ -29,6 +29,14 @@
     max-width: 36rem;
   }
 
+  .night-profile__stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mission-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .featured-cyber__card {
     height: clamp(5.625rem, 16vw, 7.5rem);
   }
@@ -253,12 +261,13 @@
   .home-copy {
     grid-column: 1;
     grid-row: 1;
-    padding-top: 3.5rem;
+    padding-top: 2.5rem;
     gap: 0;
   }
 
   .home-copy .glitch-heading {
     max-width: 32rem;
+    margin-top: 0.875rem;
     font-size: 4.125rem;
     line-height: 1.25;
   }
@@ -272,7 +281,90 @@
   }
 
   .home-copy .button {
-    margin-top: 2.75rem;
+    margin-top: 2rem;
+  }
+
+  .home-copy > .home-copy__kicker {
+    margin-top: 0;
+    color: var(--color-cyan);
+    font-size: 0.8125rem;
+    line-height: 1;
+  }
+
+  .night-profile {
+    margin-top: 2rem;
+    padding: 1.375rem;
+    grid-column: 1 / -1;
+    gap: 1.25rem;
+  }
+
+  .night-profile__heading h2,
+  .journey-section__heading h2 {
+    font-size: 1.75rem;
+  }
+
+  .night-profile__progress-copy {
+    font-size: 0.75rem;
+  }
+
+  .night-profile__progress-copy strong {
+    font-size: 1.5rem;
+  }
+
+  .night-profile__stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .night-profile__stats > div {
+    min-height: 5rem;
+    padding: 0.875rem;
+  }
+
+  .night-profile__stats dt {
+    font-size: 0.6875rem;
+  }
+
+  .night-profile__stats dd {
+    font-size: 1.75rem;
+  }
+
+  .journey-section {
+    margin-top: 2rem;
+    grid-column: 1 / -1;
+    gap: 1.25rem;
+  }
+
+  .journey-section__heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .journey-section__heading p {
+    max-width: 28rem;
+    text-align: right;
+    font-size: 0.875rem;
+  }
+
+  .mission-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.125rem;
+  }
+
+  .mission-card {
+    min-height: 10.25rem;
+    padding: 1.125rem;
+    gap: 0.5rem;
+  }
+
+  .mission-card strong {
+    font-size: 1.5rem;
+  }
+
+  .mission-card > span:not(.mission-card__action) {
+    font-size: 0.8125rem;
   }
 
   .featured-section {
@@ -311,7 +403,7 @@
   }
 
   .figma-page--home .page-marker {
-    margin-top: 1.875rem;
+    margin-top: 2rem;
     grid-column: 1 / -1;
     gap: 1.875rem;
   }
@@ -571,8 +663,14 @@
   .community-heading {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto auto;
-    row-gap: 0.3125rem;
+    grid-template-rows: auto;
+    gap: 2rem;
+  }
+
+  .community-heading__copy {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 0.5rem;
   }
 
   .community-heading .glitch-heading {
@@ -583,9 +681,7 @@
     line-height: 1.2;
   }
 
-  .community-heading > p {
-    grid-column: 1;
-    grid-row: 2;
+  .community-heading__copy > p:last-child {
     color: #a6b2ba;
     font-size: 1.0625rem;
     line-height: 1.2;
@@ -596,7 +692,7 @@
     min-height: 3rem;
     margin-top: 0;
     grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-row: 1;
     align-self: center;
     padding: 0 1.25rem;
     font-size: 0.875rem;

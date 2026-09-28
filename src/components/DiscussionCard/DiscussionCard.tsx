@@ -5,11 +5,15 @@ import { useLocalStorage } from '../../hooks/useLocalStorage'
 interface DiscussionCardProps {
   discussion: Discussion
   variant?: 'feed' | 'trending'
+  onFeedback?: (message: string) => void
+  onParticipate?: () => void
 }
 
 export function DiscussionCard({
   discussion,
   variant = 'feed',
+  onFeedback,
+  onParticipate,
 }: DiscussionCardProps) {
   const [liked, setLiked] = useLocalStorage(
     `cyberpunk:reaction:discussion:${discussion.id}`,
@@ -32,6 +36,23 @@ export function DiscussionCard({
     setLocalReplies((current) => [...current, reply])
     setReplyDraft('')
     setReplyEditorOpen(false)
+    onParticipate?.()
+    onFeedback?.('Reply saved on this device')
+  }
+
+  const handleLike = () => {
+    const nextLiked = !liked
+    setLiked(nextLiked)
+
+    if (nextLiked) {
+      onParticipate?.()
+    }
+
+    onFeedback?.(
+      nextLiked
+        ? 'Discussion liked on this device'
+        : 'Discussion like removed',
+    )
   }
 
   return (
@@ -57,7 +78,7 @@ export function DiscussionCard({
           aria-label={`${liked ? 'Unlike' : 'Like'} discussion. ${likes} likes`}
           aria-pressed={liked}
           className={liked ? 'is-active' : undefined}
-          onClick={() => setLiked((current) => !current)}
+          onClick={handleLike}
           type="button"
         >
           <span aria-hidden="true">♥</span> {likes}

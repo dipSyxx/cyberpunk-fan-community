@@ -1,6 +1,6 @@
 # Cyberpunk 2077 Fan Community
 
-A responsive, mobile-first fan community built from the project’s Figma research and UX direction.
+A responsive, mobile-first fan community built from the project’s Figma research and UX direction. The product works as a browser-local “Your Night City” profile: choose an ally, save a district, and join a discussion.
 
 ## Design
 
@@ -19,11 +19,12 @@ A responsive, mobile-first fan community built from the project’s Figma resear
 
 ## Features
 
-- Four routes: Home, Characters, Night City, and Community
+- Four routes: My Night City, Characters, Night City, and Community
+- A Home dashboard that summarizes local choices and tracks three profile missions
 - Responsive desktop navigation and keyboard-accessible mobile menu
 - Character reactions, favorites filtering, and a local five-star rating
 - District saving, community likes, replies, and locally created discussions
-- Active navigation states and browser-local persistence across refreshes
+- Clear action feedback, active navigation states, and browser-local persistence across refreshes
 - Semantic page structure, descriptive image text, visible focus states, and reduced-motion support
 
 ## Run locally

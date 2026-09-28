@@ -6,7 +6,7 @@ interface MobileMenuProps {
 }
 
 const navigationItems = [
-  { to: '/', label: 'Home', end: true },
+  { to: '/', label: 'My Night City', end: true },
   { to: '/characters', label: 'Characters', end: false },
   { to: '/night-city', label: 'Night City', end: false },
   { to: '/community', label: 'Community', end: false },
@@ -43,7 +43,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             <h2>Navigation</h2>
             <span className="mobile-menu__glitch-close">Close</span>
           </div>
-          <p className="mobile-menu__intro">Explore Night City</p>
+          <p className="mobile-menu__intro">Build your local fan profile</p>
           <div className="mobile-menu__nav">
             {navigationItems.map((item, index) => {
               const isActive = item.end
@@ -62,7 +62,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
               )
             })}
           </div>
-          <p className="mobile-menu__note">Prototype menu</p>
+          <p className="mobile-menu__note">Your choices stay on this device</p>
         </div>
       </div>
       <div className="mobile-menu__topline">
@@ -77,7 +77,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           Close
         </button>
       </div>
-      <p className="mobile-menu__intro">Explore Night City</p>
+      <p className="mobile-menu__intro">Build your local fan profile</p>
       <nav aria-label="Mobile navigation" className="mobile-menu__nav">
         {navigationItems.map((item, index) => (
           <NavLink
@@ -95,7 +95,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </NavLink>
         ))}
       </nav>
-      <p className="mobile-menu__note">Prototype menu</p>
+      <p className="mobile-menu__note">Your choices stay on this device</p>
     </div>
   )
 }

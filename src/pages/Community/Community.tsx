@@ -1,9 +1,11 @@
 import { useRef, type FormEvent } from 'react'
 import { ActionButton } from '../../components/Button/Button'
 import { DiscussionCard } from '../../components/DiscussionCard/DiscussionCard'
+import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { discussions, type Discussion } from '../../data/discussions'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { useTransientStatus } from '../../hooks/useTransientStatus'
 
 interface LocalDiscussion extends Discussion {
   createdLocally: true
@@ -14,6 +16,12 @@ export function Community() {
   const [localDiscussions, setLocalDiscussions] = useLocalStorage<
     LocalDiscussion[]
   >('cyberpunk:local-discussions', [])
+  const [, setHasParticipated] = useLocalStorage<boolean>(
+    'cyberpunk:community-participated',
+    false,
+  )
+  const { status, showStatus } = useTransientStatus()
+  const markParticipation = () => setHasParticipated(true)
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -39,6 +47,8 @@ export function Community() {
       },
       ...current,
     ])
+    markParticipation()
+    showStatus('Post added to your local community feed')
 
     form.reset()
     dialogRef.current?.close()
@@ -47,8 +57,14 @@ export function Community() {
   return (
     <div className="figma-page figma-page--community">
       <header className="page-title community-heading">
-        <h1 className="glitch-heading glitch-heading--yellow">Community</h1>
-        <p>Share theories, rate characters, discuss endings and discover what other fans are talking about.</p>
+        <div className="community-heading__copy">
+          <p className="community-kicker">Local prototype</p>
+          <h1 className="glitch-heading glitch-heading--yellow">Community</h1>
+          <p>
+            Community prototype — posts, likes, and replies are stored only in
+            this browser.
+          </p>
+        </div>
         <ActionButton onClick={() => dialogRef.current?.showModal()}>
           + New post
         </ActionButton>
@@ -57,16 +73,24 @@ export function Community() {
       <div className="community-layout">
         <section aria-label="Community discussions" className="discussion-list">
           {[...localDiscussions, ...discussions].map((discussion) => (
-            <DiscussionCard discussion={discussion} key={discussion.id} />
+            <DiscussionCard
+              discussion={discussion}
+              key={discussion.id}
+              onFeedback={showStatus}
+              onParticipate={markParticipation}
+            />
           ))}
         </section>
 
         <aside className="community-sidebar">
           <section className="community-panel community-panel--yellow">
-            <h2>Community status</h2>
-            <p className="community-panel__primary">2.8K discussions</p>
-            <p>14.2K reactions this week</p>
-            <p className="community-panel__online">438 fans online</p>
+            <h2>Your local activity</h2>
+            <p className="community-panel__primary">
+              {localDiscussions.length} local{' '}
+              {localDiscussions.length === 1 ? 'post' : 'posts'}
+            </p>
+            <p>Saved only on this device</p>
+            <p className="community-panel__online">No account required</p>
           </section>
           <section className="community-panel community-panel--cyan">
             <h2>Trending</h2>
@@ -85,6 +109,7 @@ export function Community() {
       </div>
 
       <PageMarker index="04" label="Community" />
+      <InteractionStatus status={status} />
 
       <dialog className="discussion-dialog" ref={dialogRef}>
         <form onSubmit={handleSubmit}>

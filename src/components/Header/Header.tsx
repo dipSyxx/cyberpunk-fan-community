@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
 
 const navigationItems = [
-  { to: '/', label: 'Home', end: true },
+  { to: '/', label: 'My Night City', end: true },
   { to: '/characters', label: 'Characters', end: false },
   { to: '/night-city', label: 'Night City', end: false },
   { to: '/community', label: 'Community', end: false },

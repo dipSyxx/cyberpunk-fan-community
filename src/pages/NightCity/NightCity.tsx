@@ -1,20 +1,34 @@
 import japantownImage from '../../assets/images/japantown.jpeg'
+import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { districts } from '../../data/districts'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { useTransientStatus } from '../../hooks/useTransientStatus'
 
 export function NightCity() {
   const [savedDistricts, setSavedDistricts] = useLocalStorage<string[]>(
     'cyberpunk:saved-districts',
     [],
   )
+  const { status, showStatus } = useTransientStatus()
 
   const toggleDistrict = (id: string) => {
+    const district = districts.find((item) => item.id === id)
+    const isSaved = savedDistricts.includes(id)
+
     setSavedDistricts((current) =>
       current.includes(id)
         ? current.filter((districtId) => districtId !== id)
         : [...current, id],
     )
+
+    if (district) {
+      showStatus(
+        isSaved
+          ? `${district.name} removed from Your Night City`
+          : `${district.name} saved to Your Night City`,
+      )
+    }
   }
 
   return (
@@ -85,6 +99,7 @@ export function NightCity() {
       </section>
 
       <PageMarker index="03" label="Night City" />
+      <InteractionStatus status={status} />
     </div>
   )
 }
