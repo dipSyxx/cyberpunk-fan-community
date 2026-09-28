@@ -1,3 +1,4 @@
+import { useState, type FormEvent } from 'react'
 import type { Discussion } from '../../data/discussions'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 
@@ -14,11 +15,28 @@ export function DiscussionCard({
     `cyberpunk:reaction:discussion:${discussion.id}`,
     false,
   )
+  const [localReplies, setLocalReplies] = useLocalStorage<string[]>(
+    `cyberpunk:discussion-replies:${discussion.id}`,
+    [],
+  )
+  const [replyEditorOpen, setReplyEditorOpen] = useState(false)
+  const [replyDraft, setReplyDraft] = useState('')
   const likes = discussion.likes + Number(liked)
+  const replies = discussion.replies + localReplies.length
+
+  const handleReply = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const reply = replyDraft.trim()
+    if (!reply) return
+
+    setLocalReplies((current) => [...current, reply])
+    setReplyDraft('')
+    setReplyEditorOpen(false)
+  }
 
   return (
     <article
-      className={`discussion-card discussion-card--${discussion.accent ?? 'cyan'} discussion-card--${variant}`}
+      className={`discussion-card discussion-card--${discussion.accent ?? 'cyan'} discussion-card--${variant}${replyEditorOpen || localReplies.length ? ' has-reply-content' : ''}`}
     >
       <p className="discussion-card__author">
         @{discussion.author}
@@ -44,10 +62,40 @@ export function DiscussionCard({
         >
           <span aria-hidden="true">♥</span> {likes}
         </button>
-        <span>
-          {variant === 'trending' ? 'Reply' : 'Replies'} {discussion.replies}
-        </span>
+        <button
+          aria-expanded={replyEditorOpen}
+          className="discussion-card__reply-toggle"
+          onClick={() => setReplyEditorOpen((current) => !current)}
+          type="button"
+        >
+          {variant === 'trending' ? 'Reply' : 'Replies'} {replies}
+        </button>
       </div>
+      {localReplies.length > 0 ? (
+        <ul aria-label="Local replies" className="discussion-card__local-replies">
+          {localReplies.map((reply, index) => (
+            <li key={`${discussion.id}-reply-${index}`}>
+              <strong>@local_merc</strong> {reply}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {replyEditorOpen ? (
+        <form className="discussion-card__reply-form" onSubmit={handleReply}>
+          <label className="visually-hidden" htmlFor={`reply-${discussion.id}`}>
+            Reply to {discussion.title}
+          </label>
+          <input
+            id={`reply-${discussion.id}`}
+            maxLength={240}
+            onChange={(event) => setReplyDraft(event.target.value)}
+            placeholder="Write a local reply..."
+            required
+            value={replyDraft}
+          />
+          <button type="submit">Send</button>
+        </form>
+      ) : null}
     </article>
   )
 }

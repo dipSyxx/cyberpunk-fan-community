@@ -6,6 +6,7 @@ export interface Character {
   id: string
   name: string
   role: string
+  category: 'merc' | 'rockerboy' | 'tech'
   description: string
   image: string
   imageAlt: string
@@ -19,6 +20,7 @@ export const characters: Character[] = [
     id: 'v',
     name: 'V',
     role: 'Mercenary',
+    category: 'merc',
     description: 'Relic carrier · Afterlife regular',
     image: vImage,
     imageAlt: 'V seated in a dark Night City apartment',
@@ -30,6 +32,7 @@ export const characters: Character[] = [
     id: 'johnny-silverhand',
     name: 'Johnny Silverhand',
     role: 'Rockerboy / Rebel',
+    category: 'rockerboy',
     description: 'Rockerboy · Rebel · Digital ghost',
     image: johnnyImage,
     imageAlt: 'Johnny Silverhand standing beneath cold blue lights',
@@ -41,6 +44,7 @@ export const characters: Character[] = [
     id: 'judy-alvarez',
     name: 'Judy Alvarez',
     role: 'Braindance Technician',
+    category: 'tech',
     description: 'Braindance tech · Mox ally',
     image: judyImage,
     imageAlt: 'Judy Alvarez standing against a dark background',

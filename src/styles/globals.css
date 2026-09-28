@@ -104,6 +104,18 @@ h3 {
   transform: translateY(0);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .site-header {
   height: 2.875rem;
   margin: 1.125rem 1.125rem 0;
@@ -1065,6 +1077,29 @@ h3 {
     4px 4px rgba(252, 238, 9, 0.38);
 }
 
+.character-card__favorite {
+  position: absolute;
+  z-index: 2;
+  top: 0.625rem;
+  right: 0.625rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(0, 240, 255, 0.82);
+  border-radius: 0;
+  background: rgba(7, 9, 11, 0.88);
+  box-shadow: 2px 2px 0 rgba(0, 240, 255, 0.32);
+  color: var(--color-cyan);
+  font-size: 1rem;
+}
+
+.character-card__favorite.is-active {
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+}
+
 .character-card--cyan {
   border-color: rgba(0, 240, 255, 0.82);
   box-shadow:
@@ -1185,6 +1220,68 @@ h3 {
   line-height: 1.35;
 }
 
+.character-filter,
+.character-rating {
+  display: flex;
+  margin-top: 0.625rem;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.character-filter button {
+  min-height: 1.5rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-black);
+  color: var(--color-muted);
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.character-filter button.is-active {
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
+}
+
+.character-rating button {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #56636a;
+  line-height: 1;
+}
+
+.character-rating button.is-active {
+  color: var(--color-yellow);
+}
+
+.character-rating + p {
+  margin-top: 0.375rem;
+}
+
+.character-empty-state {
+  min-height: 8.25rem;
+  padding: 1rem;
+  border: 1px dashed rgba(0, 240, 255, 0.72);
+  background: var(--color-surface);
+}
+
+.character-empty-state h2 {
+  color: var(--color-yellow);
+  font-size: 1.25rem;
+  text-transform: uppercase;
+}
+
+.character-empty-state p {
+  margin-top: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
 .reaction-button {
   display: inline-flex;
   min-height: 2.125rem;
@@ -1266,11 +1363,23 @@ h3 {
 }
 
 .night-city-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   color: var(--color-white);
   font-size: 1rem;
   letter-spacing: 0.05em;
   line-height: 1.25;
   text-transform: uppercase;
+}
+
+.night-city-section-title span {
+  color: var(--color-cyan);
+  font-family: var(--font-body);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 .figma-page--night-city .district-grid {
@@ -1279,6 +1388,7 @@ h3 {
 }
 
 .district-card {
+  position: relative;
   height: 8.25rem;
   border: 1px solid rgba(252, 238, 9, 0.82);
   border-radius: 2px;
@@ -1286,6 +1396,30 @@ h3 {
   box-shadow:
     -2px 0 rgba(255, 49, 87, 0.16),
     4px 4px rgba(252, 238, 9, 0.38);
+}
+
+.district-card__save {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  background: var(--color-black);
+  color: var(--color-cyan);
+  font-size: 0.875rem;
+}
+
+.district-card__save[aria-pressed='true'] {
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+}
+
+.district-card.is-saved {
+  background: linear-gradient(135deg, var(--color-surface), rgba(252, 238, 9, 0.08));
 }
 
 .district-card--pacifica {
@@ -1444,6 +1578,64 @@ h3 {
   color: var(--color-red);
 }
 
+.discussion-card__actions .discussion-card__reply-toggle {
+  color: var(--color-yellow);
+}
+
+.discussion-card__local-replies {
+  display: grid;
+  width: 100%;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  gap: 0.375rem;
+  list-style: none;
+}
+
+.discussion-card__local-replies li {
+  padding-left: 0.625rem;
+  border-left: 2px solid var(--color-cyan);
+  color: #b8c2c7;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.discussion-card__local-replies strong {
+  color: var(--color-cyan);
+  font-weight: 500;
+}
+
+.discussion-card__reply-form {
+  display: grid;
+  width: 100%;
+  margin-top: 0.375rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+.discussion-card__reply-form input {
+  min-width: 0;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0;
+  background: var(--color-black);
+  font-size: 0.75rem;
+}
+
+.discussion-card__reply-form input:focus {
+  border-color: var(--color-cyan);
+}
+
+.discussion-card__reply-form button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-cyan);
+  background: var(--color-surface-light);
+  color: var(--color-cyan);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 .page-marker {
   display: grid;
   gap: 1.125rem;
@@ -1578,6 +1770,11 @@ h3 {
 @media (hover: hover) and (pointer: fine) {
   .button,
   .reaction-button,
+  .character-card__favorite,
+  .character-filter button,
+  .character-rating button,
+  .district-card__save,
+  .discussion-card__reply-form button,
   .menu-button,
   .mobile-menu__close,
   .mobile-menu__link,
@@ -1602,6 +1799,10 @@ h3 {
   }
 
   .reaction-button:hover,
+  .character-card__favorite:hover,
+  .character-filter button:hover,
+  .district-card__save:hover,
+  .discussion-card__reply-form button:hover,
   .menu-button:hover {
     border-color: var(--color-yellow);
     color: var(--color-yellow);

@@ -1,14 +1,22 @@
 import japantownImage from '../../assets/images/japantown.jpeg'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
-
-const districts = [
-  { id: 'watson', name: 'Watson', description: 'Markets & megabuildings' },
-  { id: 'westbrook', name: 'Westbrook', description: 'Luxury & neon nightlife' },
-  { id: 'pacifica', name: 'Pacifica', description: 'Broken dreams & gangs' },
-  { id: 'heywood', name: 'Heywood', description: 'Community & street culture' },
-]
+import { districts } from '../../data/districts'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
 
 export function NightCity() {
+  const [savedDistricts, setSavedDistricts] = useLocalStorage<string[]>(
+    'cyberpunk:saved-districts',
+    [],
+  )
+
+  const toggleDistrict = (id: string) => {
+    setSavedDistricts((current) =>
+      current.includes(id)
+        ? current.filter((districtId) => districtId !== id)
+        : [...current, id],
+    )
+  }
+
   return (
     <div className="figma-page figma-page--night-city">
       <div className="night-city-hero">
@@ -45,19 +53,35 @@ export function NightCity() {
         </div>
       </div>
 
-      <h2 className="night-city-section-title">Explore districts</h2>
+      <h2 className="night-city-section-title">
+        Explore districts
+        <span>{savedDistricts.length} / {districts.length} saved</span>
+      </h2>
 
       <section aria-label="Night City districts" className="district-grid">
-        {districts.map((district) => (
-          <article
-            className={`district-card district-card--${district.id}`}
-            key={district.id}
-          >
-            <h2>{district.name}</h2>
-            <p>{district.description}</p>
-            <span aria-hidden="true" />
-          </article>
-        ))}
+        {districts.map((district) => {
+          const isSaved = savedDistricts.includes(district.id)
+
+          return (
+            <article
+              className={`district-card district-card--${district.id}${isSaved ? ' is-saved' : ''}`}
+              key={district.id}
+            >
+              <h2>{district.name}</h2>
+              <p>{district.description}</p>
+              <span aria-hidden="true" />
+              <button
+                aria-label={`${isSaved ? 'Remove' : 'Save'} ${district.name} ${isSaved ? 'from' : 'to'} saved districts`}
+                aria-pressed={isSaved}
+                className="district-card__save"
+                onClick={() => toggleDistrict(district.id)}
+                type="button"
+              >
+                <span aria-hidden="true">{isSaved ? '★' : '☆'}</span>
+              </button>
+            </article>
+          )
+        })}
       </section>
 
       <PageMarker index="03" label="Night City" />

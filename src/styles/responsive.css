@@ -346,6 +346,11 @@
     padding: 1.25rem;
   }
 
+  .character-card__favorite {
+    top: 2rem;
+    right: 2rem;
+  }
+
   .character-card__image {
     position: static;
     z-index: auto;
@@ -410,7 +415,8 @@
   }
 
   .character-insight {
-    height: 9.375rem;
+    min-height: 9.375rem;
+    height: auto;
     padding: 1.125rem;
     border: 1px solid rgba(0, 240, 255, 0.82);
     background: var(--color-surface);
@@ -611,7 +617,8 @@
   }
 
   .discussion-card {
-    height: 10.875rem;
+    min-height: 10.875rem;
+    height: auto;
     padding: 1.125rem;
     gap: 0.625rem;
   }

@@ -2,9 +2,15 @@ import type { Character } from '../../data/characters'
 
 interface CharacterCardProps {
   character: Character
+  isFavorite: boolean
+  onToggleFavorite: (id: string) => void
 }
 
-export function CharacterCard({ character }: CharacterCardProps) {
+export function CharacterCard({
+  character,
+  isFavorite,
+  onToggleFavorite,
+}: CharacterCardProps) {
   const displayName =
     character.id === 'v'
       ? `${character.name} / ${character.role}`
@@ -12,6 +18,15 @@ export function CharacterCard({ character }: CharacterCardProps) {
 
   return (
     <article className={`character-card character-card--${character.accent}`}>
+      <button
+        aria-label={`${isFavorite ? 'Remove' : 'Add'} ${character.name} ${isFavorite ? 'from' : 'to'} favorites`}
+        aria-pressed={isFavorite}
+        className={`character-card__favorite${isFavorite ? ' is-active' : ''}`}
+        onClick={() => onToggleFavorite(character.id)}
+        type="button"
+      >
+        <span aria-hidden="true">{isFavorite ? '★' : '☆'}</span>
+      </button>
       <img
         alt={character.imageAlt}
         className="character-card__image"

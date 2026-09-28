@@ -1,46 +1,28 @@
-import japantownImage from '../assets/images/japantown.jpeg'
-import nightCityImage from '../assets/images/night-city.png'
-
 export interface District {
   id: string
   name: string
-  zone: string
   description: string
-  image: string
-  imageAlt: string
-  saves: number
-  imagePosition?: string
 }
 
 export const districts: District[] = [
   {
-    id: 'japantown',
-    name: 'Japantown',
-    zone: 'Westbrook',
-    description:
-      'Neon markets, luxury towers, and a nightlife that never admits when the party is over.',
-    image: japantownImage,
-    imageAlt: 'Crowds and glowing lanterns at a Japantown festival',
-    saves: 854,
-  },
-  {
     id: 'watson',
     name: 'Watson',
-    zone: 'Northside',
-    description: 'Dense streets, markets and megabuildings.',
-    image: nightCityImage,
-    imageAlt: 'Night City streets and high-rise buildings in daylight',
-    saves: 672,
-    imagePosition: 'left center',
+    description: 'Markets & megabuildings',
+  },
+  {
+    id: 'westbrook',
+    name: 'Westbrook',
+    description: 'Luxury & neon nightlife',
   },
   {
     id: 'pacifica',
     name: 'Pacifica',
-    zone: 'Coastview',
-    description: 'Abandoned luxury, gangs and broken promises.',
-    image: nightCityImage,
-    imageAlt: 'Sunlit Night City skyline viewed from street level',
-    saves: 519,
-    imagePosition: 'right center',
+    description: 'Broken dreams & gangs',
+  },
+  {
+    id: 'heywood',
+    name: 'Heywood',
+    description: 'Community & street culture',
   },
 ]
