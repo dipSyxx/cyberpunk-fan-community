@@ -733,12 +733,8 @@ h3 {
   color: var(--color-cyan);
 }
 
-.cybr-btn {
-  --cybr-primary: var(--color-yellow);
-  --cybr-shadow-primary: var(--color-cyan);
-  --cybr-shadow-secondary: var(--color-red);
-  --cybr-color: var(--color-black);
-  --cybr-border: 2px;
+:root {
+  --cybr-glitch-motion: cybr-glitch 2s infinite;
   --cybr-shimmy: 5%;
   --cybr-shimmy-negative: -5%;
   --cybr-clip: polygon(
@@ -829,6 +825,21 @@ h3 {
     8% 80%,
     0 70%
   );
+}
+
+:where(button, a[href], .character-card, .district-card, .discussion-card) {
+  --cybr-interaction-layer: none;
+  --cybr-interaction-filter: none;
+  position: relative;
+  isolation: isolate;
+}
+
+.cybr-btn {
+  --cybr-primary: var(--color-yellow);
+  --cybr-shadow-primary: var(--color-cyan);
+  --cybr-shadow-secondary: var(--color-red);
+  --cybr-color: var(--color-black);
+  --cybr-border: 2px;
   isolation: isolate;
   border: 1px solid #020507;
   background: var(--cybr-primary);
@@ -862,6 +873,7 @@ h3 {
 .cybr-btn::after {
   z-index: -1;
   background: var(--cybr-primary);
+  filter: var(--cybr-interaction-filter, none);
   transition: filter 160ms ease;
 }
 
@@ -881,7 +893,7 @@ h3 {
 .cybr-btn__glitch {
   position: absolute;
   inset: calc(var(--cybr-border) * -1);
-  display: none;
+  display: var(--cybr-interaction-layer, none);
   padding: inherit;
   align-items: center;
   justify-content: center;
@@ -892,7 +904,7 @@ h3 {
   text-shadow:
     2px 2px var(--cybr-shadow-primary),
     -2px -2px var(--cybr-shadow-secondary);
-  animation: cybr-glitch 2s infinite;
+  animation: var(--cybr-glitch-motion);
   pointer-events: none;
 }
 
@@ -905,19 +917,23 @@ h3 {
   content: "";
 }
 
-.cybr-btn:hover .cybr-btn__glitch,
-.cybr-btn:focus-visible .cybr-btn__glitch,
-.cybr-btn:active .cybr-btn__glitch {
-  display: flex;
+:where(button:not(.cybr-btn), a[href]:not(.cybr-btn), .character-card, .district-card, .discussion-card)::before {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: var(--cybr-interaction-layer);
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(255, 49, 87, 0.24), rgba(0, 240, 255, 0.18));
+  box-shadow: inset 2px 0 var(--color-red), inset -2px 0 var(--color-cyan);
+  animation: var(--cybr-glitch-motion);
+  pointer-events: none;
+  content: '';
 }
 
-.cybr-btn:hover::after,
-.cybr-btn:focus-visible::after {
-  filter: brightness(0.82);
-}
-
-.cybr-btn:active::after {
-  filter: brightness(0.68);
+:where(button:enabled, a[href]):focus-visible,
+:where(.character-card, .district-card, .discussion-card):has(:focus-visible) {
+  --cybr-interaction-layer: flex;
+  --cybr-interaction-filter: brightness(0.82);
 }
 
 @keyframes cybr-glitch {
@@ -2300,64 +2316,32 @@ h3 {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .button,
-  .reaction-button,
-  .character-card__favorite,
-  .collection-filter button,
-  .character-rating button,
-  .district-card__save,
-  .reply-dialog__form button,
-  .menu-button,
-  .mobile-menu__close,
-  .mobile-menu__link,
-  .featured-cyber__card,
-  .mission-card,
-  .desktop-navigation a {
-    transition:
-      border-color 160ms ease,
-      background-color 160ms ease,
-      color 160ms ease,
-      filter 160ms ease,
-      transform 160ms ease;
+  :where(button:enabled, a[href], .character-card, .district-card, .discussion-card):hover {
+    --cybr-interaction-layer: flex;
+    --cybr-interaction-filter: brightness(0.82);
   }
 
-  .button:hover,
-  .reaction-button:hover,
-  .featured-cyber__card:hover,
-  .mission-card:hover {
+  :where(button:enabled, a[href]):active {
+    --cybr-interaction-layer: flex;
+    --cybr-interaction-filter: brightness(0.68);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :where(.button, .reaction-button, .featured-cyber__card, .mission-card) {
+    transition: transform 160ms ease;
+  }
+
+  :where(.button:enabled, a.button, .reaction-button:enabled, .featured-cyber__card, .mission-card):hover {
     transform: translateY(-2px);
-  }
-
-  .button--primary:not(.cybr-btn):hover {
-    background: var(--color-cyan);
-  }
-
-  .reaction-button:hover,
-  .character-card__favorite:hover,
-  .collection-filter button:hover,
-  .district-card__save:hover,
-  .reply-dialog__form button:hover,
-  .menu-button:hover {
-    border-color: var(--color-yellow);
-    color: var(--color-yellow);
-  }
-
-  .menu-button:hover {
-    color: var(--color-black);
-    filter: brightness(1.08);
-  }
-
-  .desktop-navigation a:not(.desktop-navigation__cta):hover {
-    background: rgba(0, 240, 255, 0.08);
-    color: var(--color-cyan);
-  }
-
-  .desktop-navigation .desktop-navigation__cta:hover {
-    filter: brightness(1.08);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --cybr-glitch-motion: none;
+  }
+
   *,
   *::before,
   *::after {
