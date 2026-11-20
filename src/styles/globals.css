@@ -827,11 +827,10 @@ h3 {
   );
 }
 
-:where(button, a[href], .character-card, .district-card, .discussion-card) {
+:where(button, a[href]) {
   --cybr-interaction-layer: none;
   --cybr-interaction-filter: none;
   position: relative;
-  isolation: isolate;
 }
 
 .cybr-btn {
@@ -917,23 +916,48 @@ h3 {
   content: "";
 }
 
-:where(button:not(.cybr-btn), a[href]:not(.cybr-btn), .character-card, .district-card, .discussion-card)::before {
+:where(button:not(.cybr-btn), a[href]:not(.cybr-btn))::before {
+  --edge-length: var(--cybr-edge-length, 0.5rem);
+  --edge-depth: var(--cybr-edge-depth, 0.25rem);
+  --edge-width: var(--cybr-edge-width, 1px);
+  --edge-primary: var(--cybr-edge-primary, var(--color-cyan));
+  --edge-secondary: var(--cybr-edge-secondary, var(--color-red));
   position: absolute;
   z-index: 3;
-  inset: 0;
+  inset: -2px;
   display: var(--cybr-interaction-layer);
+  border: 1px solid var(--cybr-edge-outline, transparent);
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(255, 49, 87, 0.24), rgba(0, 240, 255, 0.18));
-  box-shadow: inset 2px 0 var(--color-red), inset -2px 0 var(--color-cyan);
-  animation: var(--cybr-glitch-motion);
+  background:
+    linear-gradient(var(--edge-primary) 0 0) left top / var(--edge-length) var(--edge-width) no-repeat,
+    linear-gradient(var(--edge-primary) 0 0) left top / var(--edge-width) var(--edge-depth) no-repeat,
+    linear-gradient(var(--edge-secondary) 0 0) right bottom / var(--edge-length) var(--edge-width) no-repeat,
+    linear-gradient(var(--edge-secondary) 0 0) right bottom / var(--edge-width) var(--edge-depth) no-repeat;
+  animation: var(--cybr-edge-motion, none);
   pointer-events: none;
   content: '';
 }
 
-:where(button:enabled, a[href]):focus-visible,
-:where(.character-card, .district-card, .discussion-card):has(:focus-visible) {
+:where(button:enabled, a[href]):focus-visible {
   --cybr-interaction-layer: flex;
   --cybr-interaction-filter: brightness(0.82);
+}
+
+@keyframes cybr-edge-glitch {
+  15% {
+    clip-path: inset(0 0 45%);
+    transform: translateX(3px);
+  }
+
+  30% {
+    clip-path: inset(45% 0 0);
+    transform: translateX(-2px);
+  }
+
+  55% {
+    clip-path: none;
+    transform: none;
+  }
 }
 
 @keyframes cybr-glitch {
@@ -1335,6 +1359,25 @@ h3 {
 .mission-grid {
   grid-template-columns: 1fr;
   gap: 0.75rem;
+}
+
+.mission-card,
+.mobile-menu__nav a {
+  --cybr-edge-length: 1.125rem;
+  --cybr-edge-depth: 0.5rem;
+  --cybr-edge-width: 2px;
+  --cybr-edge-outline: rgba(0, 240, 255, 0.25);
+}
+
+.mission-card--yellow,
+.mobile-menu__link--1 {
+  --cybr-edge-primary: var(--color-yellow);
+}
+
+.mission-card--red,
+.mobile-menu__link--3 {
+  --cybr-edge-primary: var(--color-red);
+  --cybr-edge-secondary: var(--color-cyan);
 }
 
 .mission-card {
@@ -2316,7 +2359,7 @@ h3 {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :where(button:enabled, a[href], .character-card, .district-card, .discussion-card):hover {
+  :where(button:enabled, a[href]):hover {
     --cybr-interaction-layer: flex;
     --cybr-interaction-filter: brightness(0.82);
   }
@@ -2328,11 +2371,15 @@ h3 {
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  :where(.button, .reaction-button, .featured-cyber__card, .mission-card) {
+  :where(button:enabled, a[href]):not(.cybr-btn):hover {
+    --cybr-edge-motion: cybr-edge-glitch 220ms steps(1, end);
+  }
+
+  .button.cybr-btn {
     transition: transform 160ms ease;
   }
 
-  :where(.button:enabled, a.button, .reaction-button:enabled, .featured-cyber__card, .mission-card):hover {
+  :where(button:enabled, a[href]).button.cybr-btn:hover {
     transform: translateY(-2px);
   }
 }
