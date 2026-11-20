@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import nightCityImage from '../../assets/images/night-city.png'
 import { LinkButton } from '../../components/Button/Button'
+import { Outings } from '../../components/Outings/Outings'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
 import { characters } from '../../data/characters'
@@ -113,6 +114,8 @@ export function Home() {
           max="3"
           value={completedMissions}
         />
+
+        <Outings savedDistrictIds={savedDistrictIds} />
 
         <dl className="night-profile__stats">
           <div>

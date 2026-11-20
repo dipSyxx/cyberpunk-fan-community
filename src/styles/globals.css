@@ -1135,6 +1135,103 @@ h3 {
   background: linear-gradient(90deg, var(--color-cyan), var(--color-yellow));
 }
 
+.outings,
+.outing-journal {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-left: 2px solid var(--color-cyan);
+  background: var(--color-black);
+}
+
+.outings h3,
+.outing-journal h3 {
+  color: var(--color-yellow);
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+
+.outings__prompt,
+.outings__note-form,
+.outing-journal li {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.outings h4,
+.outing-journal h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1.2;
+}
+
+.outings p,
+.outing-journal p,
+.outings__note-form label {
+  max-width: 65ch;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.outings .outings__meta,
+.outing-journal .outings__meta {
+  color: var(--color-cyan);
+  font-size: 0.75rem;
+}
+
+.outings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.outings__note-form textarea {
+  width: min(100%, 40rem);
+  padding: 0.625rem;
+  resize: vertical;
+  border: 1px solid var(--color-cyan);
+  background: var(--color-surface);
+}
+
+.outings__journal-link {
+  width: fit-content;
+  color: var(--color-cyan);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.outings .outings__feedback {
+  color: var(--color-yellow);
+}
+
+.outings__feedback:empty {
+  position: absolute;
+}
+
+.outing-journal {
+  scroll-margin-block-start: 1rem;
+}
+
+.outing-journal ol {
+  display: grid;
+  gap: 0.875rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outing-journal li {
+  padding-block-start: 0.75rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.outing-journal li p {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .night-profile__stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

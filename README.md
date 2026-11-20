@@ -21,6 +21,7 @@ A responsive, mobile-first fan community built from the project’s Figma resear
 
 - Four routes: My Night City, Characters, Night City, and Community
 - A Home dashboard that names your chosen allies and saved districts, links to both collections, and tracks three profile missions
+- Night City outings that prioritize your saved districts, resume after a reload, and keep dated notes in a local journal. Repeats unlock after all new outings are complete
 - Responsive desktop navigation and keyboard-accessible mobile menu
 - Character reactions, favorites filtering, and a local five-star rating
 - District saving with a saved-only view, community likes, replies, and locally created discussions
@@ -72,4 +73,4 @@ This is an unofficial, non-commercial school project. Cyberpunk 2077 and its cha
 
 ## Scope
 
-The project intentionally has no backend, authentication, database, real-time synchronization, or admin panel. Favorites, ratings, saved districts, likes, replies, and new discussions are stored only in the current browser. Static data is isolated under `src/data`, making a later API integration straightforward.
+The project intentionally has no backend, authentication, database, real-time synchronization, or admin panel. Favorites, ratings, saved districts, likes, replies, new discussions, and the outing journal are stored only in the current browser. Static data is isolated under `src/data`, making a later API integration straightforward.
