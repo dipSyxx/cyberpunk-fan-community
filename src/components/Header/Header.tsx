@@ -54,6 +54,7 @@ export function Header() {
           <button
             aria-controls="mobile-navigation"
             aria-expanded={menuOpen}
+            aria-haspopup="dialog"
             aria-label="Open navigation menu"
             className="menu-button"
             onClick={() => setMenuOpen(true)}

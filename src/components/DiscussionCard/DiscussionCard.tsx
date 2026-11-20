@@ -27,8 +27,9 @@ export function DiscussionCard({
   const replyInputRef = useRef<HTMLInputElement>(null)
   const [replyDialogOpen, setReplyDialogOpen] = useState(false)
   const [replyDraft, setReplyDraft] = useState('')
+  const [replySaved, setReplySaved] = useState(false)
   const likes = discussion.likes + Number(liked)
-  const replies = discussion.replies + localReplies.length
+  const replyCountLabel = `${localReplies.length} local ${localReplies.length === 1 ? 'reply' : 'replies'}`
   const replyDialogId = `reply-dialog-${discussion.id}`
 
   const openReplyDialog = () => {
@@ -36,6 +37,7 @@ export function DiscussionCard({
 
     if (!dialog || dialog.open) return
 
+    setReplySaved(false)
     dialog.showModal()
     setReplyDialogOpen(true)
     window.requestAnimationFrame(() => replyInputRef.current?.focus())
@@ -59,8 +61,8 @@ export function DiscussionCard({
 
     setLocalReplies((current) => [...current, reply])
     setReplyDraft('')
+    setReplySaved(true)
     onParticipate?.()
-    onFeedback?.('Reply saved on this device')
   }
 
   const handleLike = () => {
@@ -114,7 +116,7 @@ export function DiscussionCard({
             onClick={openReplyDialog}
             type="button"
           >
-            {variant === 'trending' ? 'Reply' : 'Replies'} {replies}
+            Reply · {replyCountLabel}
           </button>
         </div>
       </article>
@@ -145,9 +147,7 @@ export function DiscussionCard({
             className="reply-dialog__description"
             id={`${replyDialogId}-description`}
           >
-            {localReplies.length > 0
-              ? 'Expanded reply composer with a browser-local saved reply.'
-              : 'Expanded reply composer. Replies are stored only in this browser.'}
+            Replies are stored only in this browser.
           </p>
 
           <section
@@ -157,7 +157,7 @@ export function DiscussionCard({
             <p className="reply-dialog__author">@{discussion.author}</p>
             <h3 className="reply-dialog__title">{discussion.title}</h3>
             <p className="reply-dialog__metrics">
-              <span aria-hidden="true">♥</span> {likes} &nbsp; Replies {replies}
+              <span aria-hidden="true">♥</span> {likes} &nbsp; {replyCountLabel}
             </p>
 
             {localReplies.length > 0 ? (
@@ -184,13 +184,19 @@ export function DiscussionCard({
               <input
                 id={`reply-${discussion.id}`}
                 maxLength={240}
-                onChange={(event) => setReplyDraft(event.target.value)}
+                onChange={(event) => {
+                  setReplyDraft(event.target.value)
+                  setReplySaved(false)
+                }}
                 placeholder="Write a local reply..."
                 ref={replyInputRef}
                 required
                 value={replyDraft}
               />
               <button type="submit">Send</button>
+              <p className="reply-dialog__status" role="status">
+                {replySaved ? 'Reply saved in this browser.' : ''}
+              </p>
             </form>
           </section>
         </div>

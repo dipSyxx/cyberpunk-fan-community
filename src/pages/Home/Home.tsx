@@ -39,7 +39,7 @@ export function Home() {
       label: 'Pick your ally',
       description: favoriteCharacters.length
         ? `${favoriteCharacters.length} favorite ${favoriteCharacters.length === 1 ? 'character' : 'characters'}`
-        : 'Choose a favorite character',
+        : 'Select the star on a character card',
       to: '/characters',
       complete: favoriteCharacters.length > 0,
       accent: 'yellow',

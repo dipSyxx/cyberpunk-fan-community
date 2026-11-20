@@ -61,7 +61,7 @@ export function Characters() {
     <div className="figma-page figma-page--characters">
       <header className="page-title">
         <h1 className="glitch-heading glitch-heading--yellow">Characters</h1>
-        <p>Meet the people shaping Night City and vote for your favorites.</p>
+        <p>Select the star on a character card to add an ally to your profile.</p>
       </header>
 
       {visibleCharacters.length > 0 ? (
@@ -83,7 +83,7 @@ export function Characters() {
       )}
 
       <section className="favorite-prompt">
-        <h2 className="section-label section-label--white">Fan favorites</h2>
+        <h2 className="section-label section-label--white">Fan poll</h2>
         <div className="favorite-prompt__reactions">
           <ReactionButton
             activeLabel="Johnny"

@@ -13,30 +13,36 @@ const navigationItems = [
 ]
 
 export function MobileMenu({ onClose }: MobileMenuProps) {
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDialogElement>(null)
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const previousFocus = document.activeElement as HTMLElement | null
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    const previousFocus = document.activeElement
     const originalOverflow = document.body.style.overflow
+    dialog.showModal()
     document.body.style.overflow = 'hidden'
-    closeButtonRef.current?.focus()
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      dialog.close()
       document.body.style.overflow = originalOverflow
-      document.removeEventListener('keydown', handleKeyDown)
-      previousFocus?.focus()
+      if (previousFocus instanceof HTMLElement) previousFocus.focus()
     }
-  }, [onClose])
+  }, [])
 
   return (
-    <div className="mobile-menu" id="mobile-navigation">
+    <dialog
+      aria-labelledby="mobile-navigation-title"
+      className="mobile-menu"
+      id="mobile-navigation"
+      onCancel={(event) => {
+        event.preventDefault()
+        onClose()
+      }}
+      ref={dialogRef}
+    >
       <div aria-hidden="true" className="cybr-btn mobile-menu__glitch">
         <div className="cybr-btn__glitch mobile-menu__glitch-layer">
           <div className="mobile-menu__topline">
@@ -66,12 +72,11 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         </div>
       </div>
       <div className="mobile-menu__topline">
-        <h2>Navigation</h2>
+        <h2 id="mobile-navigation-title">Navigation</h2>
         <button
           aria-label="Close navigation menu"
           className="mobile-menu__close"
           onClick={onClose}
-          ref={closeButtonRef}
           type="button"
         >
           Close
@@ -96,6 +101,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         ))}
       </nav>
       <p className="mobile-menu__note">Your choices stay on this device</p>
-    </div>
+    </dialog>
   )
 }
