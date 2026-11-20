@@ -1,57 +1,63 @@
-import { useRef, useState, type FormEvent, type MouseEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react'
 import type { Discussion } from '../../data/discussions'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 
 interface DiscussionCardProps {
   discussion: Discussion
+  localReplies: string[]
+  replyDialogOpen: boolean
   variant?: 'feed' | 'trending'
+  onCloseReply: () => void
   onFeedback?: (message: string) => void
+  onOpenReply: () => void
   onParticipate?: () => void
+  onReply: (reply: string) => boolean
 }
 
 export function DiscussionCard({
   discussion,
+  localReplies,
+  replyDialogOpen,
   variant = 'feed',
+  onCloseReply,
   onFeedback,
+  onOpenReply,
   onParticipate,
+  onReply,
 }: DiscussionCardProps) {
   const [liked, setLiked] = useLocalStorage(
     `cyberpunk:reaction:discussion:${discussion.id}`,
     false,
   )
-  const [localReplies, setLocalReplies] = useLocalStorage<string[]>(
-    `cyberpunk:discussion-replies:${discussion.id}`,
-    [],
-  )
+  const replyButtonRef = useRef<HTMLButtonElement>(null)
   const replyDialogRef = useRef<HTMLDialogElement>(null)
   const replyInputRef = useRef<HTMLInputElement>(null)
-  const [replyDialogOpen, setReplyDialogOpen] = useState(false)
   const [replyDraft, setReplyDraft] = useState('')
-  const [replySaved, setReplySaved] = useState(false)
+  const [replyStatus, setReplyStatus] = useState<'saved' | 'error' | null>(null)
   const likes = discussion.likes + Number(liked)
   const replyCountLabel = `${localReplies.length} local ${localReplies.length === 1 ? 'reply' : 'replies'}`
   const replyDialogId = `reply-dialog-${discussion.id}`
 
-  const openReplyDialog = () => {
+  useEffect(() => {
     const dialog = replyDialogRef.current
+    if (!replyDialogOpen || !dialog) return
 
-    if (!dialog || dialog.open) return
-
-    setReplySaved(false)
+    const opener = document.activeElement
+    const replyButton = replyButtonRef.current
+    setReplyStatus(null)
     dialog.showModal()
-    setReplyDialogOpen(true)
-    window.requestAnimationFrame(() => replyInputRef.current?.focus())
-  }
+    replyInputRef.current?.focus()
 
-  const closeReplyDialog = () => {
-    const dialog = replyDialogRef.current
-
-    if (dialog?.open) dialog.close()
-    setReplyDialogOpen(false)
-  }
+    return () => {
+      dialog.close()
+      if (opener === document.body || !opener?.isConnected) {
+        replyButton?.focus()
+      }
+    }
+  }, [replyDialogOpen])
 
   const handleDialogBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target === event.currentTarget) closeReplyDialog()
+    if (event.target === event.currentTarget) onCloseReply()
   }
 
   const handleReply = (event: FormEvent<HTMLFormElement>) => {
@@ -59,10 +65,9 @@ export function DiscussionCard({
     const reply = replyDraft.trim()
     if (!reply) return
 
-    setLocalReplies((current) => [...current, reply])
-    setReplyDraft('')
-    setReplySaved(true)
-    onParticipate?.()
+    const saved = onReply(reply)
+    if (saved) setReplyDraft('')
+    setReplyStatus(saved ? 'saved' : 'error')
   }
 
   const handleLike = () => {
@@ -113,7 +118,8 @@ export function DiscussionCard({
             aria-controls={replyDialogId}
             aria-expanded={replyDialogOpen}
             className="discussion-card__reply-toggle"
-            onClick={openReplyDialog}
+            onClick={onOpenReply}
+            ref={replyButtonRef}
             type="button"
           >
             Reply · {replyCountLabel}
@@ -126,9 +132,11 @@ export function DiscussionCard({
         aria-labelledby={`${replyDialogId}-title`}
         className="reply-dialog"
         id={replyDialogId}
-        onCancel={() => setReplyDialogOpen(false)}
+        onCancel={(event) => {
+          event.preventDefault()
+          onCloseReply()
+        }}
         onClick={handleDialogBackdrop}
-        onClose={() => setReplyDialogOpen(false)}
         ref={replyDialogRef}
       >
         <div className="reply-dialog__content">
@@ -137,7 +145,7 @@ export function DiscussionCard({
             <button
               aria-label="Close reply dialog"
               className="reply-dialog__close"
-              onClick={closeReplyDialog}
+              onClick={onCloseReply}
               type="button"
             >
               Close
@@ -156,6 +164,7 @@ export function DiscussionCard({
           >
             <p className="reply-dialog__author">@{discussion.author}</p>
             <h3 className="reply-dialog__title">{discussion.title}</h3>
+            <p className="reply-dialog__excerpt">{discussion.excerpt}</p>
             <p className="reply-dialog__metrics">
               <span aria-hidden="true">♥</span> {likes} &nbsp; {replyCountLabel}
             </p>
@@ -186,7 +195,7 @@ export function DiscussionCard({
                 maxLength={240}
                 onChange={(event) => {
                   setReplyDraft(event.target.value)
-                  setReplySaved(false)
+                  setReplyStatus(null)
                 }}
                 placeholder="Write a local reply..."
                 ref={replyInputRef}
@@ -195,7 +204,8 @@ export function DiscussionCard({
               />
               <button type="submit">Send</button>
               <p className="reply-dialog__status" role="status">
-                {replySaved ? 'Reply saved in this browser.' : ''}
+                {replyStatus === 'saved' && 'Reply saved in this browser.'}
+                {replyStatus === 'error' && 'Could not save your reply. Try again.'}
               </p>
             </form>
           </section>

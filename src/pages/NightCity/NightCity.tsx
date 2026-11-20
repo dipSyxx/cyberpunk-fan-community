@@ -1,16 +1,22 @@
+import { useSearchParams } from 'react-router-dom'
 import japantownImage from '../../assets/images/japantown.jpeg'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
+import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
 import { districts } from '../../data/districts'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
 
 export function NightCity() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const showSaved = searchParams.get('filter') === 'saved'
   const [savedDistricts, setSavedDistricts] = useLocalStorage<string[]>(
     'cyberpunk:saved-districts',
     [],
   )
   const { status, showStatus } = useTransientStatus()
+  const saved = districts.filter(({ id }) => savedDistricts.includes(id))
+  const visibleDistricts = showSaved ? saved : districts
 
   const toggleDistrict = (id: string) => {
     const district = districts.find((item) => item.id === id)
@@ -67,36 +73,63 @@ export function NightCity() {
         </div>
       </div>
 
-      <h2 className="night-city-section-title">
-        Explore districts
-        <span>{savedDistricts.length} / {districts.length} saved</span>
-      </h2>
+      <div className="district-heading">
+        <h2 className="night-city-section-title">
+          Explore districts
+          <span>{saved.length} / {districts.length} saved</span>
+        </h2>
+        <div aria-label="Filter districts" className="collection-filter" role="group">
+          <button
+            aria-pressed={!showSaved}
+            onClick={() => setSearchParams({}, { replace: true })}
+            type="button"
+          >
+            All districts
+          </button>
+          <button
+            aria-pressed={showSaved}
+            onClick={() => setSearchParams({ filter: 'saved' }, { replace: true })}
+            type="button"
+          >
+            Saved districts
+          </button>
+        </div>
+      </div>
 
-      <section aria-label="Night City districts" className="district-grid">
-        {districts.map((district) => {
-          const isSaved = savedDistricts.includes(district.id)
+      {visibleDistricts.length > 0 ? (
+        <section aria-label="Night City districts" className="district-grid">
+          {visibleDistricts.map((district) => {
+            const isSaved = savedDistricts.includes(district.id)
 
-          return (
-            <article
-              className={`district-card district-card--${district.id}${isSaved ? ' is-saved' : ''}`}
-              key={district.id}
-            >
-              <h2>{district.name}</h2>
-              <p>{district.description}</p>
-              <span aria-hidden="true" />
-              <button
-                aria-label={`${isSaved ? 'Remove' : 'Save'} ${district.name} ${isSaved ? 'from' : 'to'} saved districts`}
-                aria-pressed={isSaved}
-                className="district-card__save"
-                onClick={() => toggleDistrict(district.id)}
-                type="button"
+            return (
+              <article
+                className={`district-card district-card--${district.id}${isSaved ? ' is-saved' : ''}`}
+                key={district.id}
               >
-                <span aria-hidden="true">{isSaved ? '★' : '☆'}</span>
-              </button>
-            </article>
-          )
-        })}
-      </section>
+                <h2>{district.name}</h2>
+                <p>{district.description}</p>
+                <span aria-hidden="true" />
+                <button
+                  aria-label={`${isSaved ? 'Remove' : 'Save'} ${district.name} ${isSaved ? 'from' : 'to'} saved districts`}
+                  aria-pressed={isSaved}
+                  className="district-card__save"
+                  onClick={() => toggleDistrict(district.id)}
+                  type="button"
+                >
+                  <span aria-hidden="true">{isSaved ? '★' : '☆'}</span>
+                </button>
+              </article>
+            )
+          })}
+        </section>
+      ) : (
+        <div className="collection-empty-state" role="status">
+          <h2>No saved districts yet</h2>
+          <p>Choose All districts and select the star on a district card.</p>
+        </div>
+      )}
+
+      <RelatedDiscussions savedDistrictIds={savedDistricts} />
 
       <PageMarker index="03" label="Night City" />
       <InteractionStatus status={status} />

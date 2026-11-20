@@ -20,10 +20,11 @@ A responsive, mobile-first fan community built from the project’s Figma resear
 ## Features
 
 - Four routes: My Night City, Characters, Night City, and Community
-- A Home dashboard that summarizes local choices and tracks three profile missions
+- A Home dashboard that names your chosen allies and saved districts, links to both collections, and tracks three profile missions
 - Responsive desktop navigation and keyboard-accessible mobile menu
 - Character reactions, favorites filtering, and a local five-star rating
-- District saving, community likes, replies, and locally created discussions
+- District saving with a saved-only view, community likes, replies, and locally created discussions
+- Related discussions for selected allies and districts, plus a My activity list that opens your local posts and discussions you replied to
 - Clear action feedback, active navigation states, and browser-local persistence across refreshes
 - Semantic page structure, descriptive image text, visible focus states, and reduced-motion support
 

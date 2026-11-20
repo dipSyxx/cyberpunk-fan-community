@@ -7,6 +7,8 @@ export interface Discussion {
   tag: string
   likes: number
   replies: number
+  characterId?: string
+  districtId?: string
   accent?: 'cyan' | 'red' | 'yellow'
 }
 
@@ -46,6 +48,7 @@ export const discussions: Discussion[] = [
     tag: 'Night City',
     likes: 96,
     replies: 21,
+    districtId: 'westbrook',
     accent: 'red',
   },
   {
@@ -58,6 +61,7 @@ export const discussions: Discussion[] = [
     tag: 'Characters',
     likes: 241,
     replies: 67,
+    characterId: 'johnny-silverhand',
     accent: 'yellow',
   },
 ]

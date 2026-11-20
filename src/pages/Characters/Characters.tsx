@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { CharacterCard } from '../../components/CharacterCard/CharacterCard'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { ReactionButton } from '../../components/ReactionButton/ReactionButton'
+import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
 import { characters, type Character } from '../../data/characters'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
@@ -18,7 +20,9 @@ const filters: Array<{ value: CharacterFilter; label: string }> = [
 ]
 
 export function Characters() {
-  const [filter, setFilter] = useState<CharacterFilter>('all')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedFilter = searchParams.get('filter')
+  const filter = filters.find(({ value }) => value === requestedFilter)?.value ?? 'all'
   const [favorites, setFavorites] = useLocalStorage<string[]>(
     'cyberpunk:favorite-characters',
     [],
@@ -76,11 +80,13 @@ export function Characters() {
           ))}
         </section>
       ) : (
-        <div className="character-empty-state" role="status">
+        <div className="collection-empty-state" role="status">
           <h2>No favorites yet</h2>
           <p>Choose All and select the star on a character card.</p>
         </div>
       )}
+
+      <RelatedDiscussions favoriteCharacterIds={favorites} />
 
       <section className="favorite-prompt">
         <h2 className="section-label section-label--white">Fan poll</h2>
@@ -113,13 +119,15 @@ export function Characters() {
       <section aria-label="Character insights" className="character-insights">
         <article className="character-insight character-insight--cyan">
           <h2>Filter by role</h2>
-          <div aria-label="Filter characters" className="character-filter" role="group">
+          <div aria-label="Filter characters" className="collection-filter" role="group">
             {filters.map((option) => (
               <button
                 aria-pressed={filter === option.value}
-                className={filter === option.value ? 'is-active' : undefined}
                 key={option.value}
-                onClick={() => setFilter(option.value)}
+                onClick={() => setSearchParams(
+                  option.value === 'all' ? {} : { filter: option.value },
+                  { replace: true },
+                )}
                 type="button"
               >
                 {option.label}

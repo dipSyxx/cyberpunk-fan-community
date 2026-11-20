@@ -2,7 +2,13 @@ import { Link } from 'react-router-dom'
 import nightCityImage from '../../assets/images/night-city.png'
 import { LinkButton } from '../../components/Button/Button'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
+import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
+import { characters } from '../../data/characters'
+import { districts } from '../../data/districts'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+
+const favoritesPath = '/characters?filter=favorites'
+const savedDistrictsPath = '/night-city?filter=saved'
 
 interface Mission {
   label: string
@@ -13,11 +19,11 @@ interface Mission {
 }
 
 export function Home() {
-  const [favoriteCharacters] = useLocalStorage<string[]>(
+  const [favoriteCharacterIds] = useLocalStorage<string[]>(
     'cyberpunk:favorite-characters',
     [],
   )
-  const [savedDistricts] = useLocalStorage<string[]>(
+  const [savedDistrictIds] = useLocalStorage<string[]>(
     'cyberpunk:saved-districts',
     [],
   )
@@ -34,13 +40,15 @@ export function Home() {
     false,
   )
 
+  const favoriteCharacters = characters.filter(({ id }) => favoriteCharacterIds.includes(id))
+  const savedDistricts = districts.filter(({ id }) => savedDistrictIds.includes(id))
   const missions: Mission[] = [
     {
       label: 'Pick your ally',
       description: favoriteCharacters.length
         ? `${favoriteCharacters.length} favorite ${favoriteCharacters.length === 1 ? 'character' : 'characters'}`
         : 'Select the star on a character card',
-      to: '/characters',
+      to: favoriteCharacters.length ? favoritesPath : '/characters',
       complete: favoriteCharacters.length > 0,
       accent: 'yellow',
     },
@@ -49,7 +57,7 @@ export function Home() {
       description: savedDistricts.length
         ? `${savedDistricts.length} saved ${savedDistricts.length === 1 ? 'district' : 'districts'}`
         : 'Mark a place to remember',
-      to: '/night-city',
+      to: savedDistricts.length ? savedDistrictsPath : '/night-city',
       complete: savedDistricts.length > 0,
       accent: 'cyan',
     },
@@ -109,11 +117,23 @@ export function Home() {
         <dl className="night-profile__stats">
           <div>
             <dt>Favorite characters</dt>
-            <dd>{favoriteCharacters.length}</dd>
+            <dd>
+              {favoriteCharacters.length ? (
+                <Link className="night-profile__collection-link" to={favoritesPath}>
+                  {favoriteCharacters.map(({ name }) => name).join(', ')}
+                </Link>
+              ) : '—'}
+            </dd>
           </div>
           <div>
             <dt>Saved districts</dt>
-            <dd>{savedDistricts.length}</dd>
+            <dd>
+              {savedDistricts.length ? (
+                <Link className="night-profile__collection-link" to={savedDistrictsPath}>
+                  {savedDistricts.map(({ name }) => name).join(', ')}
+                </Link>
+              ) : '—'}
+            </dd>
           </div>
           <div>
             <dt>Character rating</dt>
@@ -124,6 +144,8 @@ export function Home() {
             <dd>{localDiscussions.length}</dd>
           </div>
         </dl>
+
+        <RelatedDiscussions favoriteCharacterIds={favoriteCharacterIds} savedDistrictIds={savedDistrictIds} />
       </section>
 
       <section className="journey-section">

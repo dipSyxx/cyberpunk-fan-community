@@ -1,27 +1,49 @@
-import { useRef, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ActionButton } from '../../components/Button/Button'
 import { DiscussionCard } from '../../components/DiscussionCard/DiscussionCard'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { discussions, type Discussion } from '../../data/discussions'
-import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { readStoredValue, useLocalStorage, writeStoredValue } from '../../hooks/useLocalStorage'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
 
 interface LocalDiscussion extends Discussion {
   createdLocally: true
 }
 
+const replyKey = (id: string) => `cyberpunk:discussion-replies:${id}`
+
 export function Community() {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeThread = searchParams.get('thread')
   const [localDiscussions, setLocalDiscussions] = useLocalStorage<
     LocalDiscussion[]
   >('cyberpunk:local-discussions', [])
+  const feed = [...localDiscussions, ...discussions]
+  const [repliesByDiscussion, setRepliesByDiscussion] = useState<Record<string, string[]>>(() =>
+    Object.fromEntries(feed.map(({ id }) => [id, readStoredValue<string[]>(replyKey(id), [])])),
+  )
   const [, setHasParticipated] = useLocalStorage<boolean>(
     'cyberpunk:community-participated',
     false,
   )
   const { status, showStatus } = useTransientStatus()
   const markParticipation = () => setHasParticipated(true)
+  const localDiscussionIds = new Set(localDiscussions.map(({ id }) => id))
+  const myActivity = feed.filter(({ id }) =>
+    localDiscussionIds.has(id) || (repliesByDiscussion[id]?.length ?? 0) > 0,
+  )
+
+  const saveReply = (id: string, reply: string) => {
+    const nextReplies = [...(repliesByDiscussion[id] ?? []), reply]
+    if (!writeStoredValue(replyKey(id), nextReplies)) return false
+
+    setRepliesByDiscussion((current) => ({ ...current, [id]: nextReplies }))
+    markParticipation()
+    return true
+  }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -71,27 +93,50 @@ export function Community() {
       </header>
 
       <div className="community-layout">
+        <section aria-labelledby="community-activity-title" className="community-panel community-activity">
+          <h2 id="community-activity-title">My activity</h2>
+          {myActivity.length > 0 ? (
+            <ul>
+              {myActivity.map(({ id, title }) => {
+                const replyCount = repliesByDiscussion[id]?.length ?? 0
+                const details = [
+                  localDiscussionIds.has(id) ? 'Your post' : '',
+                  replyCount ? `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}` : '',
+                ].filter(Boolean).join(' · ')
+
+                return (
+                  <li key={id}>
+                    <Link replace to={`?thread=${encodeURIComponent(id)}`}>{title}</Link>
+                    <span>{details}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p>Your posts and the discussions you reply to will appear here.</p>
+          )}
+        </section>
+
         <section aria-label="Community discussions" className="discussion-list">
-          {[...localDiscussions, ...discussions].map((discussion) => (
+          {activeThread && !feed.some(({ id }) => id === activeThread) ? (
+            <p role="status">This discussion isn’t available in this browser.</p>
+          ) : null}
+          {feed.map((discussion) => (
             <DiscussionCard
               discussion={discussion}
               key={discussion.id}
+              localReplies={repliesByDiscussion[discussion.id] ?? []}
+              onCloseReply={() => setSearchParams({}, { replace: true })}
               onFeedback={showStatus}
+              onOpenReply={() => setSearchParams({ thread: discussion.id }, { replace: true })}
               onParticipate={markParticipation}
+              onReply={(reply) => saveReply(discussion.id, reply)}
+              replyDialogOpen={activeThread === discussion.id}
             />
           ))}
         </section>
 
         <aside className="community-sidebar">
-          <section className="community-panel community-panel--yellow">
-            <h2>Your local activity</h2>
-            <p className="community-panel__primary">
-              {localDiscussions.length} local{' '}
-              {localDiscussions.length === 1 ? 'post' : 'posts'}
-            </p>
-            <p>Saved only on this device</p>
-            <p className="community-panel__online">No account required</p>
-          </section>
           <section className="community-panel community-panel--cyan">
             <h2>Trending</h2>
             <p># Phantom Liberty</p>

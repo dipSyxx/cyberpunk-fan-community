@@ -46,7 +46,7 @@
   }
 
   .community-sidebar {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .district-card,
@@ -622,8 +622,11 @@
     font-size: 1.125rem;
   }
 
-  .night-city-section-title {
+  .district-heading {
     margin-top: 2.125rem;
+  }
+
+  .night-city-section-title {
     font-size: 1.5rem;
     line-height: 1.2;
     text-transform: uppercase;
@@ -703,11 +706,16 @@
     min-height: 39.375rem;
     margin-top: 2.625rem;
     grid-template-columns: minmax(0, 860fr) minmax(0, 436fr);
-    gap: 2rem;
+    grid-template-areas:
+      'feed activity'
+      'feed sidebar';
+    grid-template-rows: auto 1fr;
+    gap: 1rem 2rem;
   }
 
   .discussion-list {
     display: flex;
+    grid-area: feed;
     flex-direction: column;
     gap: 1rem;
   }
@@ -755,6 +763,7 @@
     grid-template-areas:
       'author metrics'
       'title title'
+      'excerpt excerpt'
       'replies replies'
       'composer composer';
     grid-template-columns: minmax(0, 1fr) auto;
@@ -784,6 +793,7 @@
 
   .community-sidebar {
     display: flex;
+    grid-area: sidebar;
     flex-direction: column;
     gap: 1rem;
   }
@@ -822,13 +832,8 @@
     line-height: 1;
   }
 
-  .community-panel__primary {
-    color: var(--color-white) !important;
-    font-size: 1rem !important;
-  }
-
-  .community-panel__online {
-    color: var(--color-cyan) !important;
+  .community-activity {
+    grid-area: activity;
   }
 
   .figma-page--community .page-marker {
