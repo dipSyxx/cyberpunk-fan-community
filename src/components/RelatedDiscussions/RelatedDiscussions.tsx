@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { discussions } from '../../data/discussions'
+import { discussionHasSpoilers, discussions, hideSpoilersKey } from '../../data/discussions'
+import { readStoredValue } from '../../hooks/useLocalStorage'
 import { GlitchContent } from '../Button/GlitchContent'
 
 interface RelatedDiscussionsProps {
@@ -18,14 +19,18 @@ export function RelatedDiscussions({
 
   if (relatedDiscussions.length === 0) return null
 
+  const hideSpoilers = readStoredValue(hideSpoilersKey, true)
+
   return (
     <section aria-label="Related discussions" className="related-discussions">
       <h2>Related discussions</h2>
       <ul>
-        {relatedDiscussions.map(({ id, title }) => (
-          <li key={id}>
-            <Link to={`/community?thread=${encodeURIComponent(id)}`}>
-              <GlitchContent>{title}</GlitchContent>
+        {relatedDiscussions.map((discussion) => (
+          <li key={discussion.id}>
+            <Link to={`/community?thread=${encodeURIComponent(discussion.id)}`}>
+              <GlitchContent>
+                {hideSpoilers && discussionHasSpoilers(discussion) ? 'Hidden story discussion' : discussion.title}
+              </GlitchContent>
             </Link>
           </li>
         ))}

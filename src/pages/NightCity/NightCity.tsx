@@ -1,10 +1,11 @@
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import japantownImage from '../../assets/images/japantown.jpeg'
 import { GlitchContent } from '../../components/Button/GlitchContent'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
 import { districts } from '../../data/districts'
+import { districtJournalPath } from '../../data/districtJournal'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
 
@@ -110,6 +111,13 @@ export function NightCity() {
                 <h2>{district.name}</h2>
                 <p>{district.description}</p>
                 <span aria-hidden="true" />
+                <Link
+                  aria-label={`${district.name} journal`}
+                  className="district-card__journal"
+                  to={districtJournalPath(district.id)}
+                >
+                  <GlitchContent>Journal</GlitchContent>
+                </Link>
                 <button
                   aria-label={`${isSaved ? 'Remove' : 'Save'} ${district.name} ${isSaved ? 'from' : 'to'} saved districts`}
                   aria-pressed={isSaved}

@@ -1,0 +1,176 @@
+.journal-panel {
+  display: grid;
+  min-width: 0;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-charcoal);
+}
+
+.journal-panel h2,
+.district-journal-page .outing-journal h2 {
+  color: var(--color-yellow);
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+
+.journal-panel h4,
+.journal-panel p,
+.outing-comparison p {
+  overflow-wrap: anywhere;
+}
+
+.journal-panel p {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.journal-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.journal-form label,
+.outing-journal__time span {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.journal-form :is(input, textarea),
+.outings__note-form select,
+.outing-journal__time select {
+  min-width: 0;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--color-cyan);
+  border-radius: 0;
+  background: var(--color-black);
+  color: var(--color-white);
+  font: inherit;
+}
+
+.journal-form textarea {
+  resize: vertical;
+}
+
+.outings__note-form select {
+  width: fit-content;
+}
+
+.outing-journal__time {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.outing-journal .outings__actions {
+  align-items: center;
+}
+
+.outing-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.outing-comparison > div {
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+  padding: 0.625rem;
+  border-top: 2px solid var(--color-cyan);
+  background: var(--color-black);
+}
+
+.outing-comparison > div:first-child {
+  border-color: var(--color-yellow);
+}
+
+.outing-comparison h5 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.outing-comparison time {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.outing-comparison p,
+.journal-panel--preview p {
+  white-space: pre-wrap;
+}
+
+.district-card__journal {
+  max-width: calc(100% - 2.25rem);
+  margin-top: auto;
+  color: var(--color-cyan);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.district-journal-page,
+.district-journal-layout,
+.district-journal-tools {
+  gap: 1.125rem;
+}
+
+.district-journal-layout,
+.district-journal-tools {
+  display: grid;
+  align-items: start;
+}
+
+.district-journal-tools {
+  min-width: 0;
+}
+
+.district-journal-status {
+  color: var(--color-cyan);
+  font-size: 0.875rem;
+}
+
+.district-journal-status:empty {
+  position: absolute;
+}
+
+.community-spoiler-toggle,
+.discussion-dialog .discussion-dialog__spoiler {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.community-spoiler-toggle {
+  font-size: 0.875rem;
+}
+
+.community-spoiler-toggle input,
+.discussion-dialog__spoiler input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--color-cyan);
+}
+
+.discussion-card--spoiler {
+  height: auto;
+}
+
+@media (min-width: 48rem) {
+  .district-journal-layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+@media (min-width: 64rem) {
+  .community-spoiler-toggle {
+    margin-top: 1rem;
+  }
+}

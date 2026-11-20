@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { Header } from './components/Header/Header'
 import { Characters } from './pages/Characters/Characters'
 import { Community } from './pages/Community/Community'
+import { DistrictJournal } from './pages/DistrictJournal/DistrictJournal'
 import { Home } from './pages/Home/Home'
 import { NightCity } from './pages/NightCity/NightCity'
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/characters" element={<Characters />} />
             <Route path="/night-city" element={<NightCity />} />
+            <Route path="/night-city/:districtId/journal" element={<DistrictJournal />} />
             <Route path="/community" element={<Community />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

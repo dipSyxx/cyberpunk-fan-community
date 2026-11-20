@@ -7,9 +7,16 @@ export interface Discussion {
   tag: string
   likes: number
   replies: number
+  spoiler?: boolean
   characterId?: string
   districtId?: string
   accent?: 'cyan' | 'red' | 'yellow'
+}
+
+export const hideSpoilersKey = 'cyberpunk:hide-spoilers'
+
+export function discussionHasSpoilers(discussion: Discussion) {
+  return discussion.spoiler ?? discussion.tag === 'Story'
 }
 
 export const trendingDiscussion: Discussion = {
