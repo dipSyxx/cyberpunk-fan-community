@@ -2,14 +2,13 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { districts } from '../../data/districts'
 import { districtJournalPath, journalNoteLimit } from '../../data/districtJournal'
-import { readOutingClue } from '../../data/outingClues'
-import { outings, type Outing } from '../../data/outings'
+import { readOutingClue, relayStopLimit, shareOutingClue } from '../../data/outingClues'
+import { outings, readInGameTime, type InGameTime, type Outing } from '../../data/outings'
 import { readStoredValue, writeStoredValue } from '../../hooks/useLocalStorage'
 import { ActionButton } from '../Button/Button'
 import { GlitchContent } from '../Button/GlitchContent'
+import { ShareLink } from '../ShareLink/ShareLink'
 import { ClueComposer } from './ClueComposer'
-
-type InGameTime = 'day' | 'night'
 
 interface OutingEntry {
   id: number
@@ -20,11 +19,13 @@ interface OutingEntry {
   note: string
   completedAt: string
   inGameTime?: InGameTime
+  clue?: Outing
 }
 
 interface OutingJournal {
   activeOutingId: string | null
   activeClue?: Outing
+  savedClues?: Outing[]
   entries: OutingEntry[]
 }
 
@@ -38,8 +39,20 @@ const timeOptions = [
   { value: 'night', label: 'Night' },
 ]
 
-function parseInGameTime(value: FormDataEntryValue | null) {
-  return value === 'day' || value === 'night' ? value : undefined
+function RelayStops({ clue }: { clue: Outing }) {
+  if (!clue.previousStops?.length) return null
+
+  return (
+    <div className="relay-stops">
+      <strong>Previous stops</strong>
+      <ol>
+        {clue.previousStops.map(({ id, title, prompt }) => (
+          <li key={id}><strong>{title}</strong><p>{prompt}</p></li>
+        ))}
+      </ol>
+      <p>Stop {clue.previousStops.length + 1} of {relayStopLimit}</p>
+    </div>
+  )
 }
 
 export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
@@ -65,6 +78,7 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
   const suggestions = [...savedOutings, ...otherOutings]
   const suggestionIndex = Math.max(0, suggestions.findIndex(({ id }) => id === suggestedOutingId))
   const activeOuting = journal.activeClue ?? outings.find(({ id }) => id === journal.activeOutingId)
+  const incomingIsActive = incomingClue && incomingClue.id === activeOuting?.id
   const displayedOuting = activeOuting ?? suggestions[suggestionIndex]
   const canRepeat = !activeOuting && newOutings.length === 0
   const latestEntryIds = new Map(journal.entries.toReversed().map(({ outingId, id }) => [outingId, id]))
@@ -82,7 +96,14 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
     if (unhandledClue) incomingClueRef.current?.focus()
   }, [location.hash, unhandledClue])
 
-  const saveJournal = (next: OutingJournal, message: string, focusHeading = true) => {
+  const saveJournal = (update: (current: OutingJournal) => OutingJournal | null, message: string, focusHeading = true) => {
+    const current = readStoredValue(storageKey, journal)
+    const next = update(current)
+    if (!next) {
+      setJournal(current)
+      setFeedback('Your outing changed in another tab. Review it and try again.')
+      return false
+    }
     if (!writeStoredValue(storageKey, next)) {
       setFeedback('Could not save this change in your browser. Try again.')
       return false
@@ -94,12 +115,27 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
     return true
   }
 
+  const dismissIncomingClue = () => navigate({ pathname: location.pathname, search: location.search, hash: '' }, { replace: true })
+
   const startOuting = (id: string, clue?: Outing) => {
     if (activeOuting) return
 
-    if (saveJournal({ ...journal, activeOutingId: id, activeClue: clue }, 'Outing started.') && clue) {
-      navigate({ pathname: location.pathname, search: location.search, hash: '' }, { replace: true })
+    if (saveJournal((current) => current.activeOutingId ? null : {
+      ...current,
+      activeOutingId: id,
+      activeClue: clue,
+      savedClues: current.savedClues?.filter((saved) => saved.id !== id),
+    }, 'Outing started.')) {
+      setShowNoteForm(false)
+      if (incomingClue?.id === id) dismissIncomingClue()
     }
+  }
+
+  const deferClue = (clue: Outing) => {
+    if (saveJournal((current) => current.activeOutingId === clue.id ? null : ({
+      ...current,
+      savedClues: current.savedClues?.some(({ id }) => id === clue.id) ? current.savedClues : [...(current.savedClues ?? []), clue],
+    }), 'Clue saved for later.')) dismissIncomingClue()
   }
 
   const saveNote = (event: FormEvent<HTMLFormElement>) => {
@@ -114,18 +150,22 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
       return
     }
 
-    const entry: OutingEntry = {
-      id: journal.entries.length + 1,
-      outingId: activeOuting.id,
-      title: activeOuting.title,
-      district: districtNames.get(activeOuting.districtId) ?? activeOuting.districtId,
-      districtId: activeOuting.districtId,
-      note,
-      completedAt: new Date().toISOString(),
-      inGameTime: parseInGameTime(data.get('inGameTime')),
-    }
     if (saveJournal(
-      { activeOutingId: null, entries: [entry, ...journal.entries] },
+      (current) => {
+        if (current.activeOutingId !== activeOuting.id) return null
+        const entry: OutingEntry = {
+          id: current.entries.length + 1,
+          outingId: activeOuting.id,
+          title: activeOuting.title,
+          district: districtNames.get(activeOuting.districtId) ?? activeOuting.districtId,
+          districtId: activeOuting.districtId,
+          note,
+          completedAt: new Date().toISOString(),
+          inGameTime: readInGameTime(data.get('inGameTime')),
+          clue: current.activeClue,
+        }
+        return { ...current, activeOutingId: null, activeClue: undefined, entries: [entry, ...current.entries] }
+      },
       'Note added to your outing journal.',
     )) {
       setShowNoteForm(false)
@@ -142,13 +182,18 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
             {incomingClue ? (
               <>
                 <p className="outings__meta">Fan clue · {districtNames.get(incomingClue.districtId)}</p>
+                <RelayStops clue={incomingClue} />
                 <h4>{incomingClue.title}</h4>
                 <p>{incomingClue.prompt}</p>
-                {activeOuting ? (
-                  <p>Finish your current outing to start this clue.</p>
-                ) : (
-                  <ActionButton onClick={() => startOuting(incomingClue.id, incomingClue)}>Start fan outing</ActionButton>
-                )}
+                {activeOuting && <p>{incomingIsActive ? 'This clue is your current outing.' : 'Finish your current outing to start this clue.'}</p>}
+                <div className="outings__actions">
+                  {!activeOuting && <ActionButton onClick={() => startOuting(incomingClue.id, incomingClue)}>Start fan outing</ActionButton>}
+                  {incomingIsActive ? (
+                    <ActionButton onClick={dismissIncomingClue} variant="secondary">Close clue preview</ActionButton>
+                  ) : (
+                    <ActionButton onClick={() => deferClue(incomingClue)} variant="secondary">Save clue for later</ActionButton>
+                  )}
+                </div>
               </>
             ) : <p role="status">This fan clue link is invalid or incomplete.</p>}
           </div>
@@ -157,6 +202,7 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
           <>
             <div aria-live="polite" className="outings__prompt">
               <p className="outings__meta">{districtNames.get(displayedOuting.districtId)}</p>
+              {activeOuting && <RelayStops clue={activeOuting} />}
               <h4>{displayedOuting.title}</h4>
               <p>{displayedOuting.prompt}</p>
             </div>
@@ -207,6 +253,27 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
           <p>All outings completed. Choose one to repeat from your journal.</p>
         )}
 
+        {!!journal.savedClues?.length && (
+          <section aria-labelledby="saved-clues-title" className="journal-panel">
+            <h4 id="saved-clues-title">Saved fan clues</h4>
+            {journal.savedClues.map((clue) => (
+              <div className="journal-panel journal-panel--preview" key={clue.id}>
+                <p className="outings__meta">{districtNames.get(clue.districtId)}</p>
+                <strong>{clue.title}</strong>
+                <RelayStops clue={clue} />
+                <p>{clue.prompt}</p>
+                <div className="outings__actions">
+                  <ActionButton disabled={!!activeOuting} onClick={() => startOuting(clue.id, clue)}>Start saved clue</ActionButton>
+                  <ActionButton onClick={() => saveJournal((current) => ({
+                    ...current,
+                    savedClues: current.savedClues?.filter(({ id }) => id !== clue.id),
+                  }), 'Clue removed.')} variant="secondary">Remove saved clue</ActionButton>
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
         {journal.entries.length > 0 && (
           <a className="outings__journal-link" href="#outing-journal">
             <GlitchContent>Open outing journal</GlitchContent>
@@ -243,6 +310,11 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
           <ol>
             {journal.entries.map((entry) => {
               const districtId = entry.districtId ?? districts.find(({ name }) => name === entry.district)?.id
+              const previousStops = entry.clue ? [
+                ...(entry.clue.previousStops ?? []),
+                { id: entry.clue.id, title: entry.clue.title, prompt: entry.clue.prompt },
+              ] : []
+              const canContinueRelay = previousStops.length < relayStopLimit
               return (
                 <li key={entry.id}>
                   <div className="outings__meta">
@@ -252,16 +324,24 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
                   </div>
                   <h4>{entry.title}</h4>
                   <p>{entry.note}</p>
+                  {entry.clue && (
+                    <details className="journal-panel">
+                      <summary>View and share this clue</summary>
+                      <RelayStops clue={entry.clue} />
+                      <p>{entry.clue.prompt}</p>
+                      <ShareLink label="Clue link" link={shareOutingClue(entry.clue)} />
+                    </details>
+                  )}
                   <label className="outing-journal__time">
                     <span>In-game time</span>
                     <select
                       value={entry.inGameTime ?? ''}
                       onChange={(event) => {
-                        const inGameTime = parseInGameTime(event.target.value)
-                        saveJournal({
-                          ...journal,
-                          entries: journal.entries.map((item) => item.id === entry.id ? { ...item, inGameTime } : item),
-                        }, 'In-game time saved.', false)
+                        const inGameTime = readInGameTime(event.target.value)
+                        saveJournal((current) => ({
+                          ...current,
+                          entries: current.entries.map((item) => item.id === entry.id ? { ...item, inGameTime } : item),
+                        }), 'In-game time saved.', false)
                       }}
                     >
                       {timeOptions.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
@@ -280,7 +360,9 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
                     </ActionButton>
                     {districtId && (
                       <>
-                        <ActionButton onClick={() => setClueEntryId(entry.id)} variant="secondary">Create clue</ActionButton>
+                        {canContinueRelay && (
+                          <ActionButton onClick={() => setClueEntryId(entry.id)} variant="secondary">{entry.clue ? 'Add next stop' : 'Create clue'}</ActionButton>
+                        )}
                         <Link className="outings__journal-link" to={districtJournalPath(districtId)} state={{ note: entry.note }}>
                           <GlitchContent>Add to district journal</GlitchContent>
                         </Link>
@@ -296,8 +378,9 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
                       </ActionButton>
                     )}
                   </div>
-                  {districtId && clueEntryId === entry.id && (
-                    <ClueComposer districtId={districtId} sourceTitle={entry.title} onClose={() => setClueEntryId(null)} />
+                  {entry.clue && !canContinueRelay && <p>This route has all {relayStopLimit} stops.</p>}
+                  {districtId && canContinueRelay && clueEntryId === entry.id && (
+                    <ClueComposer districtId={districtId} previousStops={previousStops} sourceTitle={entry.clue ? '' : entry.title} onClose={() => setClueEntryId(null)} />
                   )}
                 </li>
               )

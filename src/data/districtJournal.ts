@@ -1,4 +1,6 @@
-export const journalNoteLimit = 240
+import { readShareId, readShareObject, readShareText, shareTextLimit } from './shareLinks'
+
+export const journalNoteLimit = shareTextLimit
 
 export interface DistrictJournalEntry {
   id: string
@@ -19,24 +21,17 @@ export function exportDistrictEntry(districtId: string, { id, note, createdAt }:
 }
 
 export function readDistrictEntry(value: unknown, districtId: string): DistrictJournalEntry | null {
-  if (!value || typeof value !== 'object' || !('version' in value) ||
-      value.version !== 1 || !('districtId' in value) || value.districtId !== districtId ||
-      !('entry' in value) || !value.entry || typeof value.entry !== 'object') return null
+  const file = readShareObject(value)
+  const entry = file?.version === 1 && file.districtId === districtId ? readJournalEntry(file.entry) : null
+  return entry ? { ...entry, imported: true } : null
+}
 
-  const entry = value.entry
-  if (!('id' in entry) || typeof entry.id !== 'string' ||
-      !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(entry.id) ||
-      !('note' in entry) || typeof entry.note !== 'string' ||
-      !entry.note.trim() || entry.note.length > journalNoteLimit ||
-      !('createdAt' in entry) || typeof entry.createdAt !== 'string' ||
-      !Number.isFinite(Date.parse(entry.createdAt))) return null
-
-  return {
-    id: entry.id.toLowerCase(),
-    note: entry.note.trim(),
-    createdAt: new Date(entry.createdAt).toISOString(),
-    imported: true,
-  }
+export function readJournalEntry(value: unknown): DistrictJournalEntry | null {
+  const entry = readShareObject(value)
+  const id = readShareId(entry?.id)
+  const note = readShareText(entry?.note)
+  const date = typeof entry?.createdAt === 'string' ? Date.parse(entry.createdAt) : NaN
+  return id && note && Number.isFinite(date) ? { id, note, createdAt: new Date(date).toISOString() } : null
 }
 
 export function districtJournalPath(districtId: string) {

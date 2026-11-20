@@ -1,8 +1,18 @@
-export interface Outing {
+export interface OutingStop {
   id: string
-  districtId: string
   title: string
   prompt: string
+}
+
+export interface Outing extends OutingStop {
+  districtId: string
+  previousStops?: OutingStop[]
+}
+
+export type InGameTime = 'day' | 'night'
+
+export function readInGameTime(value: unknown): InGameTime | undefined {
+  return value === 'day' || value === 'night' ? value : undefined
 }
 
 export const outings: Outing[] = [

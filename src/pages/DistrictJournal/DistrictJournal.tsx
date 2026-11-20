@@ -5,6 +5,8 @@ import { GlitchContent } from '../../components/Button/GlitchContent'
 import { exportDistrictEntry, journalNoteLimit, readDistrictEntry, type DistrictJournalEntry } from '../../data/districtJournal'
 import { districts, type District } from '../../data/districts'
 import { readStoredValue, writeStoredValue } from '../../hooks/useLocalStorage'
+import { DistrictCollections } from './DistrictCollections'
+import { FindingChecks } from './FindingChecks'
 
 const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium' })
 
@@ -26,24 +28,31 @@ function Journal({ district }: { district: District }) {
   const [reading, setReading] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
 
-  const save = (entry: DistrictJournalEntry) => {
+  const appendNotes = (incoming: DistrictJournalEntry[]) => {
     const stored = readStoredValue(storageKey, entries)
-    if (stored.some(({ id }) => id === entry.id)) {
-      setEntries(stored)
+    const newEntries = incoming.filter(({ id }) => !stored.some((entry) => entry.id === id))
+    const next = [...newEntries, ...stored]
+    if (newEntries.length && !writeStoredValue(storageKey, next)) return false
+    setEntries(next)
+    return newEntries.length
+  }
+
+  const save = (entry: DistrictJournalEntry) => {
+    const count = appendNotes([entry])
+    if (count === false) {
+      setMessage('Could not save the journal in this browser. Try again.')
+      return false
+    }
+    if (count === 0) {
       setMessage('This note is already in your district journal.')
       return false
     }
 
-    const next = [entry, ...stored]
-    if (!writeStoredValue(storageKey, next)) {
-      setMessage('Could not save the journal in this browser. Try again.')
-      return false
-    }
-
-    setEntries(next)
     setMessage('Note added to the district journal.')
     return true
   }
+
+  const importNotes = (notes: DistrictJournalEntry[]) => appendNotes(notes.map((note) => ({ ...note, imported: true })))
 
   const addNote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -162,6 +171,8 @@ function Journal({ district }: { district: District }) {
             )}
           </section>
           <p className="district-journal-status" role="status">{message}</p>
+          <FindingChecks addNotes={importNotes} districtId={district.id} entries={entries} />
+          <DistrictCollections addNotes={importNotes} districtId={district.id} entries={entries} />
         </div>
       </div>
     </div>

@@ -1,17 +1,19 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { clueHintLimit, clueTitleLimit, makeOutingClueLink } from '../../data/outingClues'
+import type { OutingStop } from '../../data/outings'
 import { ActionButton } from '../Button/Button'
+import { ShareLink } from '../ShareLink/ShareLink'
 
 interface ClueComposerProps {
   districtId: string
   sourceTitle: string
+  previousStops: OutingStop[]
   onClose: () => void
 }
 
-export function ClueComposer({ districtId, sourceTitle, onClose }: ClueComposerProps) {
+export function ClueComposer({ districtId, sourceTitle, previousStops, onClose }: ClueComposerProps) {
   const [link, setLink] = useState('')
   const [message, setMessage] = useState('')
-  const linkRef = useRef<HTMLInputElement>(null)
 
   const buildLink = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -23,24 +25,14 @@ export function ClueComposer({ districtId, sourceTitle, onClose }: ClueComposerP
       return
     }
 
-    setLink(makeOutingClueLink(districtId, title, hint))
+    setLink(makeOutingClueLink(districtId, title, hint, previousStops))
     setMessage('Your clue link is ready.')
-  }
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(link)
-      setMessage('Clue link copied.')
-    } catch {
-      linkRef.current?.select()
-      setMessage('Select and copy the link from the field.')
-    }
   }
 
   return (
     <section aria-labelledby="fan-clue-form-title" className="journal-panel">
-      <h4 id="fan-clue-form-title">Create a clue for a friend</h4>
-      <p>The link includes the district, title and hint you enter here.</p>
+      <h4 id="fan-clue-form-title">{previousStops.length ? `Add stop ${previousStops.length + 1}` : 'Create a clue for a friend'}</h4>
+      <p>{previousStops.length ? 'Your link shares the whole route, including your new stop.' : 'The link includes the district, title and hint you enter here.'}</p>
       <form
         className="journal-form"
         onChange={() => {
@@ -58,13 +50,7 @@ export function ClueComposer({ districtId, sourceTitle, onClose }: ClueComposerP
           <ActionButton onClick={onClose} variant="secondary">Close</ActionButton>
         </div>
       </form>
-      {link && (
-        <div className="journal-form">
-          <label htmlFor="fan-clue-link">Shareable clue link</label>
-          <input id="fan-clue-link" ref={linkRef} value={link} readOnly />
-          <ActionButton onClick={copyLink} variant="secondary">Copy clue link</ActionButton>
-        </div>
-      )}
+      {link && <ShareLink label={previousStops.length ? 'Shareable route link' : 'Shareable clue link'} link={link} />}
       <p role="status">{message}</p>
     </section>
   )

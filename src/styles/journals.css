@@ -36,7 +36,7 @@
   font-size: 0.875rem;
 }
 
-.journal-form :is(input, textarea),
+.journal-form :is(input:not([type="checkbox"]), textarea, select),
 .outings__note-form select,
 .outing-journal__time select {
   min-width: 0;
@@ -50,6 +50,76 @@
 
 .journal-form textarea {
   resize: vertical;
+}
+
+.journal-field,
+.journal-choices,
+.character-profile,
+.relay-stops {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.character-profile > a {
+  min-height: 2.75rem;
+  align-content: center;
+}
+
+.journal-panel summary {
+  width: fit-content;
+  min-height: 2.75rem;
+  padding-block: 0.625rem;
+  color: var(--color-cyan);
+  cursor: pointer;
+}
+
+.journal-notes,
+.relay-stops ol {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding-inline-start: 1.5rem;
+}
+
+.relay-stops ol {
+  list-style: decimal;
+}
+
+.journal-choices {
+  margin: 0;
+  padding: 0.5rem;
+  border: 1px solid var(--color-line);
+}
+
+.journal-choices label,
+.journal-check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  overflow-wrap: anywhere;
+}
+
+.journal-choices input,
+.journal-check input {
+  flex: none;
+  accent-color: var(--color-cyan);
+}
+
+.journal-notes li,
+.journal-text,
+.relay-stops li {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.character-dilemmas a[aria-current] {
+  color: var(--color-yellow);
+}
+
+.journal-panel h2:focus,
+.journal-panel[tabindex]:focus {
+  scroll-margin-block-start: 1rem;
 }
 
 .outings__note-form select {

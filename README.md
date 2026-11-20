@@ -24,7 +24,11 @@ A responsive, mobile-first fan community built from the project’s Figma resear
 - Night City outings that prioritize your saved districts, resume after a reload, and keep dated notes in a local journal. Repeats unlock after all new outings are complete
 - Day and night comparisons for notes from the same outing, including older notes once you label them
 - Fan clues created from an outing entry. The shareable link includes the district, clue title and hint you enter
+- Save incoming fan clues for later. After completing a clue, add the next stop and share the full district relay, up to four stops
 - A local journal for each district. Export a single note as JSON and share the file yourself. The recipient previews it before importing it into their own journal
+- Finding checks from district notes. Share where and when you saw something, then save other players’ observations and add them to your district journal
+- District collections of two or three notes. Share a collection link, preview and save a received collection, and add its notes to your own district journal
+- Character dilemmas with a local response and shareable arguments. Save your own response to open a shared argument, then reveal story spoilers if you choose
 - Responsive desktop navigation and keyboard-accessible mobile menu
 - Character reactions, favorites filtering, and a local five-star rating
 - District saving with a saved-only view, community likes, replies, and locally created discussions
@@ -77,4 +81,4 @@ This is an unofficial, non-commercial school project. Cyberpunk 2077 and its cha
 
 ## Scope
 
-The project intentionally has no backend, authentication, database, real-time synchronization, or admin panel. Favorites, ratings, saved districts, likes, replies, new discussions, and both journals are stored only in the current browser. Players exchange individual district notes by sharing exported files. Static data is isolated under `src/data`, making a later API integration straightforward.
+The project intentionally has no backend, authentication, database, real-time synchronization, or admin panel. Favorites, ratings, saved districts, community activity, and journal data are stored in the current browser. Players exchange individual district notes as files and share clues, relays, finding checks, observations, collections, and dilemma arguments as links. Each link contains the shared content at the time it was created. Players open and save the links they receive to add the shared content to their browser.

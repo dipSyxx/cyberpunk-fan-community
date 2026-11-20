@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { GlitchContent } from '../../components/Button/GlitchContent'
 import { CharacterCard } from '../../components/CharacterCard/CharacterCard'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
@@ -9,6 +9,7 @@ import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedD
 import { characters, type Character } from '../../data/characters'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
+import { CharacterDilemmas } from './CharacterDilemmas'
 
 type CharacterFilter = 'all' | 'favorites' | Character['category']
 
@@ -71,14 +72,18 @@ export function Characters() {
 
       {visibleCharacters.length > 0 ? (
         <section aria-label="Character profiles" className="character-grid">
-          {visibleCharacters.map((character) => (
-            <CharacterCard
-              character={character}
-              isFavorite={favorites.includes(character.id)}
-              key={character.id}
-              onToggleFavorite={toggleFavorite}
-            />
-          ))}
+          {visibleCharacters.map((character) => {
+            const dilemmaParams = new URLSearchParams(searchParams)
+            dilemmaParams.set('dilemma', character.id)
+            return (
+              <div className="character-profile" key={character.id}>
+                <CharacterCard character={character} isFavorite={favorites.includes(character.id)} onToggleFavorite={toggleFavorite} />
+                <Link className="outings__journal-link" to={`?${dilemmaParams.toString()}#character-dilemmas-title`}>
+                  <GlitchContent>Open dilemma for {character.name}</GlitchContent>
+                </Link>
+              </div>
+            )
+          })}
         </section>
       ) : (
         <div className="collection-empty-state" role="status">
@@ -88,6 +93,7 @@ export function Characters() {
       )}
 
       <RelatedDiscussions favoriteCharacterIds={favorites} />
+      <CharacterDilemmas />
 
       <section className="favorite-prompt">
         <h2 className="section-label section-label--white">Fan poll</h2>
