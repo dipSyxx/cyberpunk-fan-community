@@ -89,6 +89,7 @@ h3 {
 }
 
 .skip-link {
+  --cybr-content-background: var(--color-yellow);
   position: fixed;
   z-index: 100;
   top: 0.75rem;
@@ -185,6 +186,7 @@ h3 {
 }
 
 .menu-button {
+  --cybr-content-background: var(--color-yellow);
   display: inline-flex;
   height: 100%;
   min-width: 5rem;
@@ -382,11 +384,12 @@ h3 {
 }
 
 .mobile-menu__link {
+  --mobile-menu-link-gap: 1rem;
   display: flex;
   min-height: 4.1875rem;
   padding: 1.125rem 1rem;
   align-items: flex-start;
-  gap: 1rem;
+  gap: var(--mobile-menu-link-gap);
   border: 1px solid rgba(0, 240, 255, 0.88);
   border-radius: 2px;
   background: var(--color-charcoal);
@@ -421,7 +424,18 @@ h3 {
   box-shadow: 4px 4px 0 rgba(255, 49, 87, 0.42);
 }
 
-.mobile-menu__link > span:first-child {
+.mobile-menu__link .cybr-glitch-content {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: var(--mobile-menu-link-gap);
+}
+
+.mobile-menu__link > .cybr-btn__glitch--content {
+  align-items: flex-start;
+}
+
+.mobile-menu__link-index {
   color: var(--color-cyan);
   font-size: 0.8125rem;
   font-weight: 500;
@@ -435,7 +449,7 @@ h3 {
   line-height: 1;
 }
 
-.mobile-menu__link > span:last-child {
+.mobile-menu__link-arrow {
   color: var(--color-yellow);
   font-family: var(--font-display);
   font-size: 1.125rem;
@@ -721,6 +735,7 @@ h3 {
 }
 
 .button--primary {
+  --cybr-content-background: var(--color-yellow);
   background: var(--color-yellow);
   box-shadow:
     -2px 0 rgba(255, 49, 87, 0.46),
@@ -833,6 +848,11 @@ h3 {
   position: relative;
 }
 
+:where(a[href]:has(> .cybr-glitch-content)) {
+  display: inline-block;
+  max-width: 100%;
+}
+
 .cybr-btn {
   --cybr-primary: var(--color-yellow);
   --cybr-shadow-primary: var(--color-cyan);
@@ -916,48 +936,40 @@ h3 {
   content: "";
 }
 
-:where(button:not(.cybr-btn), a[href]:not(.cybr-btn))::before {
-  --edge-length: var(--cybr-edge-length, 0.5rem);
-  --edge-depth: var(--cybr-edge-depth, 0.25rem);
-  --edge-width: var(--cybr-edge-width, 1px);
-  --edge-primary: var(--cybr-edge-primary, var(--color-cyan));
-  --edge-secondary: var(--cybr-edge-secondary, var(--color-red));
-  position: absolute;
-  z-index: 3;
-  inset: -2px;
-  display: var(--cybr-interaction-layer);
-  border: 1px solid var(--cybr-edge-outline, transparent);
+.cybr-glitch-content {
+  display: block;
+  min-width: 0;
+}
+
+.cybr-btn__glitch--content {
+  --cybr-border: 1px;
+  --cybr-shadow-primary: var(--color-cyan);
+  --cybr-shadow-secondary: var(--color-red);
+  --cybr-shimmy: clamp(1px, 5%, 4px);
+  --cybr-shimmy-negative: calc(-1 * var(--cybr-shimmy));
+  z-index: 2;
+  inset: 0;
   border-radius: inherit;
-  background:
-    linear-gradient(var(--edge-primary) 0 0) left top / var(--edge-length) var(--edge-width) no-repeat,
-    linear-gradient(var(--edge-primary) 0 0) left top / var(--edge-width) var(--edge-depth) no-repeat,
-    linear-gradient(var(--edge-secondary) 0 0) right bottom / var(--edge-length) var(--edge-width) no-repeat,
-    linear-gradient(var(--edge-secondary) 0 0) right bottom / var(--edge-width) var(--edge-depth) no-repeat;
-  animation: var(--cybr-edge-motion, none);
-  pointer-events: none;
-  content: '';
+  color: inherit;
+  clip-path: inset(0);
+  text-decoration: inherit;
+  text-shadow: 1px 1px var(--cybr-shadow-primary), -1px -1px var(--cybr-shadow-secondary);
+  user-select: none;
+}
+
+.cybr-btn__glitch--content::before {
+  border-radius: inherit;
+  background: var(--cybr-content-background, var(--color-charcoal));
+  clip-path: none;
+}
+
+.cybr-btn__glitch--content > .cybr-glitch-content {
+  width: 100%;
 }
 
 :where(button:enabled, a[href]):focus-visible {
   --cybr-interaction-layer: flex;
   --cybr-interaction-filter: brightness(0.82);
-}
-
-@keyframes cybr-edge-glitch {
-  15% {
-    clip-path: inset(0 0 45%);
-    transform: translateX(3px);
-  }
-
-  30% {
-    clip-path: inset(45% 0 0);
-    transform: translateX(-2px);
-  }
-
-  55% {
-    clip-path: none;
-    transform: none;
-  }
 }
 
 @keyframes cybr-glitch {
@@ -1361,33 +1373,21 @@ h3 {
   gap: 0.75rem;
 }
 
-.mission-card,
-.mobile-menu__nav a {
-  --cybr-edge-length: 1.125rem;
-  --cybr-edge-depth: 0.5rem;
-  --cybr-edge-width: 2px;
-  --cybr-edge-outline: rgba(0, 240, 255, 0.25);
-}
-
-.mission-card--yellow,
-.mobile-menu__link--1 {
-  --cybr-edge-primary: var(--color-yellow);
-}
-
-.mission-card--red,
-.mobile-menu__link--3 {
-  --cybr-edge-primary: var(--color-red);
-  --cybr-edge-secondary: var(--color-cyan);
-}
-
 .mission-card {
+  --mission-card-gap: 0.375rem;
+  --cybr-content-background: var(--color-surface);
   display: grid;
   min-height: 8.75rem;
   padding: 0.875rem;
-  gap: 0.375rem;
   border: 1px solid rgba(252, 238, 9, 0.82);
   background: var(--color-surface);
   box-shadow: 4px 4px 0 rgba(252, 238, 9, 0.3);
+}
+
+.mission-card .cybr-glitch-content {
+  display: grid;
+  align-self: stretch;
+  gap: var(--mission-card-gap);
 }
 
 .mission-card--cyan {
@@ -1401,13 +1401,14 @@ h3 {
 }
 
 .mission-card.is-complete {
-  background:
+  --cybr-content-background:
     linear-gradient(135deg, rgba(0, 240, 255, 0.08), transparent 60%),
     var(--color-surface);
+  background: var(--cybr-content-background);
 }
 
 .mission-card__step,
-.mission-card > span:not(.mission-card__action) {
+.mission-card .cybr-glitch-content > span:not(.mission-card__action) {
   color: var(--color-muted);
   font-size: 0.6875rem;
 }
@@ -1478,6 +1479,7 @@ h3 {
 }
 
 .character-card__favorite {
+  --cybr-content-background: var(--color-black);
   position: absolute;
   z-index: 2;
   top: 0.625rem;
@@ -1629,6 +1631,7 @@ h3 {
 }
 
 .collection-filter button {
+  --cybr-content-background: var(--color-black);
   min-height: 1.5rem;
   padding: 0.2rem 0.45rem;
   border: 1px solid var(--color-line);
@@ -1683,13 +1686,13 @@ h3 {
 }
 
 .reaction-button {
+  --cybr-content-background: var(--color-surface);
   display: inline-flex;
   min-height: 2.125rem;
   width: fit-content;
   padding: 0.5rem 0.75rem;
   flex: 0 0 auto;
   align-items: center;
-  gap: 0.35rem;
   border: 1px solid rgba(0, 240, 255, 0.82);
   border-radius: 0;
   background: var(--color-surface);
@@ -1703,7 +1706,13 @@ h3 {
   text-transform: uppercase;
 }
 
-.reaction-button span:first-child {
+.reaction-button .cybr-glitch-content {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.reaction-button .cybr-glitch-content > span:first-child {
   color: var(--color-red);
 }
 
@@ -1799,6 +1808,7 @@ h3 {
 }
 
 .district-card__save {
+  --cybr-content-background: var(--color-black);
   position: absolute;
   right: 0.75rem;
   bottom: 0.75rem;
@@ -1993,6 +2003,7 @@ h3 {
 }
 
 .discussion-card__actions button {
+  --cybr-content-background: var(--color-surface);
   padding: 0;
   border: 0;
   background: transparent;
@@ -2175,6 +2186,7 @@ h3 {
 }
 
 .reply-dialog__form button {
+  --cybr-content-background: var(--color-surface);
   height: 2.625rem;
   padding: 0.5rem;
   border: 1px solid var(--color-cyan);
@@ -2371,10 +2383,6 @@ h3 {
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  :where(button:enabled, a[href]):not(.cybr-btn):hover {
-    --cybr-edge-motion: cybr-edge-glitch 220ms steps(1, end);
-  }
-
   .button.cybr-btn {
     transition: transform 160ms ease;
   }
@@ -2406,5 +2414,12 @@ h3 {
   .mobile-menu__link,
   .interaction-status {
     animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+  :where(button:enabled, a[href]):has(> .cybr-btn__glitch--content):hover:not(:focus-visible) {
+    outline: 1px solid var(--color-cyan);
+    outline-offset: 2px;
   }
 }

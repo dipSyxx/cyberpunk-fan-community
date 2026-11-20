@@ -1,4 +1,5 @@
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { GlitchContent } from '../Button/GlitchContent'
 
 interface ReactionButtonProps {
   storageKey: string
@@ -42,9 +43,11 @@ export function ReactionButton({
       onClick={() => setActive((current) => !current)}
       type="button"
     >
-      <span aria-hidden="true">{symbol}</span>
-      <span>{currentLabel}</span>
-      <strong>{formattedCount}</strong>
+      <GlitchContent>
+        <span aria-hidden="true">{symbol}</span>
+        <span>{currentLabel}</span>
+        <strong>{formattedCount}</strong>
+      </GlitchContent>
     </button>
   )
 }

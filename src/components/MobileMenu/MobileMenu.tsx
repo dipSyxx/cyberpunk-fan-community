@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { GlitchContent } from '../Button/GlitchContent'
 
 interface MobileMenuProps {
   onClose: () => void
@@ -61,9 +62,9 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                   className={`mobile-menu__link mobile-menu__link--${index + 1}${isActive ? ' is-active' : ''}`}
                   key={item.to}
                 >
-                  <span>0{index + 1}</span>
+                  <span className="mobile-menu__link-index">0{index + 1}</span>
                   <strong>{item.label}</strong>
-                  <span>→</span>
+                  <span className="mobile-menu__link-arrow">→</span>
                 </div>
               )
             })}
@@ -79,7 +80,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           onClick={onClose}
           type="button"
         >
-          Close
+          <GlitchContent>Close</GlitchContent>
         </button>
       </div>
       <p className="mobile-menu__intro">Build your local fan profile</p>
@@ -94,9 +95,11 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             onClick={onClose}
             to={item.to}
           >
-            <span aria-hidden="true">0{index + 1}</span>
-            <strong>{item.label}</strong>
-            <span aria-hidden="true">→</span>
+            <GlitchContent>
+              <span className="mobile-menu__link-index" aria-hidden="true">0{index + 1}</span>
+              <strong>{item.label}</strong>
+              <span className="mobile-menu__link-arrow" aria-hidden="true">→</span>
+            </GlitchContent>
           </NavLink>
         ))}
       </nav>

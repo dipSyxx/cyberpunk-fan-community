@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 import japantownImage from '../../assets/images/japantown.jpeg'
+import { GlitchContent } from '../../components/Button/GlitchContent'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
@@ -84,14 +85,14 @@ export function NightCity() {
             onClick={() => setSearchParams({}, { replace: true })}
             type="button"
           >
-            All districts
+            <GlitchContent>All districts</GlitchContent>
           </button>
           <button
             aria-pressed={showSaved}
             onClick={() => setSearchParams({ filter: 'saved' }, { replace: true })}
             type="button"
           >
-            Saved districts
+            <GlitchContent>Saved districts</GlitchContent>
           </button>
         </div>
       </div>
@@ -116,7 +117,9 @@ export function NightCity() {
                   onClick={() => toggleDistrict(district.id)}
                   type="button"
                 >
-                  <span aria-hidden="true">{isSaved ? '★' : '☆'}</span>
+                  <GlitchContent>
+                    <span aria-hidden="true">{isSaved ? '★' : '☆'}</span>
+                  </GlitchContent>
                 </button>
               </article>
             )

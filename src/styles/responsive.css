@@ -155,6 +155,7 @@
     font-weight: 600;
     letter-spacing: 0.05em;
     line-height: 1;
+    text-align: center;
     text-transform: uppercase;
   }
 
@@ -183,6 +184,7 @@
   }
 
   .desktop-navigation .desktop-navigation__cta {
+    --cybr-content-background: var(--color-yellow);
     border-left-color: rgba(252, 238, 9, 0.5);
     background: var(--color-yellow);
     color: var(--color-black);
@@ -193,6 +195,7 @@
   }
 
   .desktop-navigation .desktop-navigation__cta.is-active {
+    --cybr-content-background: var(--color-cyan);
     background: var(--color-cyan);
     color: var(--color-black);
     box-shadow: inset 0 -0.25rem 0 var(--color-red);
@@ -354,16 +357,16 @@
   }
 
   .mission-card {
+    --mission-card-gap: 0.5rem;
     min-height: 10.25rem;
     padding: 1.125rem;
-    gap: 0.5rem;
   }
 
   .mission-card strong {
     font-size: 1.5rem;
   }
 
-  .mission-card > span:not(.mission-card__action) {
+  .mission-card .cybr-glitch-content > span:not(.mission-card__action) {
     font-size: 0.8125rem;
   }
 

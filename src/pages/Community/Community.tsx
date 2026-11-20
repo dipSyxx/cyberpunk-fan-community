@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ActionButton } from '../../components/Button/Button'
+import { GlitchContent } from '../../components/Button/GlitchContent'
 import { DiscussionCard } from '../../components/DiscussionCard/DiscussionCard'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
@@ -106,7 +107,9 @@ export function Community() {
 
                 return (
                   <li key={id}>
-                    <Link replace to={`?thread=${encodeURIComponent(id)}`}>{title}</Link>
+                    <Link replace to={`?thread=${encodeURIComponent(id)}`}>
+                      <GlitchContent>{title}</GlitchContent>
+                    </Link>
                     <span>{details}</span>
                   </li>
                 )
@@ -169,7 +172,7 @@ export function Community() {
               onClick={() => dialogRef.current?.close()}
               type="button"
             >
-              Close
+              <GlitchContent>Close</GlitchContent>
             </button>
           </div>
           <p className="discussion-dialog__note">
@@ -198,10 +201,10 @@ export function Community() {
               onClick={() => dialogRef.current?.close()}
               type="button"
             >
-              Cancel
+              <GlitchContent>Cancel</GlitchContent>
             </button>
             <button className="button button--primary" type="submit">
-              Post locally
+              <GlitchContent>Post locally</GlitchContent>
             </button>
           </div>
         </form>

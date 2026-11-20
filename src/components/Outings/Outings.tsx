@@ -3,6 +3,7 @@ import { districts } from '../../data/districts'
 import { outings } from '../../data/outings'
 import { readStoredValue, writeStoredValue } from '../../hooks/useLocalStorage'
 import { ActionButton } from '../Button/Button'
+import { GlitchContent } from '../Button/GlitchContent'
 
 interface OutingEntry {
   id: number
@@ -146,7 +147,9 @@ export function Outings({ savedDistrictIds }: { savedDistrictIds: string[] }) {
         )}
 
         {journal.entries.length > 0 && (
-          <a className="outings__journal-link" href="#outing-journal">Open outing journal</a>
+          <a className="outings__journal-link" href="#outing-journal">
+            <GlitchContent>Open outing journal</GlitchContent>
+          </a>
         )}
         <p className="outings__feedback" role="status">{feedback}</p>
       </section>

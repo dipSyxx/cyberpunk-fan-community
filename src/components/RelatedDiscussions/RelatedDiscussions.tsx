@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { discussions } from '../../data/discussions'
+import { GlitchContent } from '../Button/GlitchContent'
 
 interface RelatedDiscussionsProps {
   favoriteCharacterIds?: string[]
@@ -23,7 +24,9 @@ export function RelatedDiscussions({
       <ul>
         {relatedDiscussions.map(({ id, title }) => (
           <li key={id}>
-            <Link to={`/community?thread=${encodeURIComponent(id)}`}>{title}</Link>
+            <Link to={`/community?thread=${encodeURIComponent(id)}`}>
+              <GlitchContent>{title}</GlitchContent>
+            </Link>
           </li>
         ))}
       </ul>

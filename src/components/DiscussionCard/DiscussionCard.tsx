@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react'
 import type { Discussion } from '../../data/discussions'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { GlitchContent } from '../Button/GlitchContent'
 
 interface DiscussionCardProps {
   discussion: Discussion
@@ -112,7 +113,7 @@ export function DiscussionCard({
             onClick={handleLike}
             type="button"
           >
-            <span aria-hidden="true">♥</span> {likes}
+            <GlitchContent><span aria-hidden="true">♥</span> {likes}</GlitchContent>
           </button>
           <button
             aria-controls={replyDialogId}
@@ -122,7 +123,7 @@ export function DiscussionCard({
             ref={replyButtonRef}
             type="button"
           >
-            Reply · {replyCountLabel}
+            <GlitchContent>Reply · {replyCountLabel}</GlitchContent>
           </button>
         </div>
       </article>
@@ -148,7 +149,7 @@ export function DiscussionCard({
               onClick={onCloseReply}
               type="button"
             >
-              Close
+              <GlitchContent>Close</GlitchContent>
             </button>
           </header>
           <p
@@ -202,7 +203,7 @@ export function DiscussionCard({
                 required
                 value={replyDraft}
               />
-              <button type="submit">Send</button>
+              <button type="submit"><GlitchContent>Send</GlitchContent></button>
               <p className="reply-dialog__status" role="status">
                 {replyStatus === 'saved' && 'Reply saved in this browser.'}
                 {replyStatus === 'error' && 'Could not save your reply. Try again.'}

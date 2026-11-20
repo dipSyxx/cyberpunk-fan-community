@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { GlitchContent } from '../Button/GlitchContent'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
 
 const navigationItems = [
@@ -20,12 +21,12 @@ export function Header() {
   return (
     <>
       <a className="skip-link" href="#main-content">
-        Skip to content
+        <GlitchContent>Skip to content</GlitchContent>
       </a>
       <header className="site-header">
         <div className="site-header__inner">
           <NavLink aria-label="Cyberpunk community home" className="brand" to="/">
-            <span>Cyberpunk 2077</span>
+            <GlitchContent>Cyberpunk 2077</GlitchContent>
           </NavLink>
 
           <nav aria-label="Primary navigation" className="desktop-navigation">
@@ -38,7 +39,7 @@ export function Header() {
                 key={item.to}
                 to={item.to}
               >
-                {item.label}
+                <GlitchContent>{item.label}</GlitchContent>
               </NavLink>
             ))}
             <NavLink
@@ -47,7 +48,7 @@ export function Header() {
               }
               to="/community"
             >
-              Community
+              <GlitchContent>Community</GlitchContent>
             </NavLink>
           </nav>
 
@@ -60,7 +61,7 @@ export function Header() {
             onClick={() => setMenuOpen(true)}
             type="button"
           >
-            Menu
+            <GlitchContent>Menu</GlitchContent>
           </button>
         </div>
       </header>

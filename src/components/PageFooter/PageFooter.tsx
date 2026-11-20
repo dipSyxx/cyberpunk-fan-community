@@ -1,3 +1,5 @@
+import { GlitchContent } from '../Button/GlitchContent'
+
 export function PageFooter() {
   return (
     <footer className="site-footer">
@@ -9,10 +11,10 @@ export function PageFooter() {
         <div>
           <p className="site-footer__heading">Official image sources</p>
           <a href="https://press.cdprojektred.com/" rel="noreferrer" target="_blank">
-            CD PROJEKT RED press center ↗
+            <GlitchContent>CD PROJEKT RED press center ↗</GlitchContent>
           </a>
           <a href="https://www.cyberpunk.net/" rel="noreferrer" target="_blank">
-            Cyberpunk 2077 official site ↗
+            <GlitchContent>Cyberpunk 2077 official site ↗</GlitchContent>
           </a>
         </div>
         <p className="site-footer__legal">

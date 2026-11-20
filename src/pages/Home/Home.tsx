@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import nightCityImage from '../../assets/images/night-city.png'
 import { LinkButton } from '../../components/Button/Button'
+import { GlitchContent } from '../../components/Button/GlitchContent'
 import { Outings } from '../../components/Outings/Outings'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
@@ -123,7 +124,7 @@ export function Home() {
             <dd>
               {favoriteCharacters.length ? (
                 <Link className="night-profile__collection-link" to={favoritesPath}>
-                  {favoriteCharacters.map(({ name }) => name).join(', ')}
+                  <GlitchContent>{favoriteCharacters.map(({ name }) => name).join(', ')}</GlitchContent>
                 </Link>
               ) : '—'}
             </dd>
@@ -133,7 +134,7 @@ export function Home() {
             <dd>
               {savedDistricts.length ? (
                 <Link className="night-profile__collection-link" to={savedDistrictsPath}>
-                  {savedDistricts.map(({ name }) => name).join(', ')}
+                  <GlitchContent>{savedDistricts.map(({ name }) => name).join(', ')}</GlitchContent>
                 </Link>
               ) : '—'}
             </dd>
@@ -163,14 +164,16 @@ export function Home() {
               key={mission.label}
               to={mission.to}
             >
-              <span className="mission-card__step">
-                0{index + 1} / {mission.complete ? 'Complete' : 'Open'}
-              </span>
-              <strong>{mission.label}</strong>
-              <span>{mission.description}</span>
-              <span className="mission-card__action" aria-hidden="true">
-                {mission.complete ? 'Review' : 'Start'} →
-              </span>
+              <GlitchContent>
+                <span className="mission-card__step">
+                  0{index + 1} / {mission.complete ? 'Complete' : 'Open'}
+                </span>
+                <strong>{mission.label}</strong>
+                <span>{mission.description}</span>
+                <span className="mission-card__action" aria-hidden="true">
+                  {mission.complete ? 'Review' : 'Start'} →
+                </span>
+              </GlitchContent>
             </Link>
           ))}
         </nav>

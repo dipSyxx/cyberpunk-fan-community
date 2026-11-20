@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { GlitchContent } from '../../components/Button/GlitchContent'
 import { CharacterCard } from '../../components/CharacterCard/CharacterCard'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
@@ -130,7 +131,7 @@ export function Characters() {
                 )}
                 type="button"
               >
-                {option.label}
+                <GlitchContent>{option.label}</GlitchContent>
               </button>
             ))}
           </div>
@@ -151,7 +152,7 @@ export function Characters() {
                 role="radio"
                 type="button"
               >
-                <span aria-hidden="true">★</span>
+                <GlitchContent><span aria-hidden="true">★</span></GlitchContent>
               </button>
             ))}
           </div>

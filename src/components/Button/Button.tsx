@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
 import { Link } from 'react-router-dom'
+import { GlitchLayer } from './GlitchContent'
 
 interface LinkButtonProps extends PropsWithChildren {
   to: string
@@ -15,9 +16,7 @@ export function LinkButton({
     <Link className={`button cybr-btn button--${variant}`} to={to}>
       <span>{children}</span>
       <span aria-hidden="true">_</span>
-      <span aria-hidden="true" className="cybr-btn__glitch">
-        {children}_
-      </span>
+      <GlitchLayer>{children}_</GlitchLayer>
       <span aria-hidden="true" className="cybr-btn__tag">
         R25
       </span>
@@ -43,9 +42,7 @@ export function ActionButton({
     >
       <span>{children}</span>
       <span aria-hidden="true">_</span>
-      <span aria-hidden="true" className="cybr-btn__glitch">
-        {children}_
-      </span>
+      <GlitchLayer>{children}_</GlitchLayer>
       <span aria-hidden="true" className="cybr-btn__tag">
         R25
       </span>

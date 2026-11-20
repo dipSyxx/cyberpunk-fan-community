@@ -1,4 +1,5 @@
 import type { Character } from '../../data/characters'
+import { GlitchContent } from '../Button/GlitchContent'
 
 interface CharacterCardProps {
   character: Character
@@ -25,7 +26,9 @@ export function CharacterCard({
         onClick={() => onToggleFavorite(character.id)}
         type="button"
       >
-        <span aria-hidden="true">{isFavorite ? '★' : '☆'}</span>
+        <GlitchContent>
+          <span aria-hidden="true">{isFavorite ? '★' : '☆'}</span>
+        </GlitchContent>
       </button>
       <img
         alt={character.imageAlt}
