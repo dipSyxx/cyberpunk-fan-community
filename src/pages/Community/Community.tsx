@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ActionButton } from '../../components/Button/Button'
 import { GlitchContent } from '../../components/Button/GlitchContent'
@@ -15,8 +15,15 @@ interface LocalDiscussion extends Discussion {
 
 const replyKey = (id: string) => `cyberpunk:discussion-replies:${id}`
 
+function isDiscussionBackdrop(event: MouseEvent<HTMLDialogElement>) {
+  if (event.target !== event.currentTarget) return false
+  const { left, right, top, bottom } = event.currentTarget.getBoundingClientRect()
+  return event.clientX < left || event.clientX >= right || event.clientY < top || event.clientY >= bottom
+}
+
 export function Community() {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const pressedBackdrop = useRef(false)
   const activeSpoilerRef = useRef<HTMLElement>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const activeThread = searchParams.get('thread')
@@ -199,7 +206,17 @@ export function Community() {
       <PageMarker index="04" label="Community" />
       <InteractionStatus status={status} />
 
-      <dialog className="discussion-dialog" ref={dialogRef}>
+      <dialog
+        className="discussion-dialog"
+        onClick={(event) => {
+          if (pressedBackdrop.current && isDiscussionBackdrop(event)) event.currentTarget.close()
+          pressedBackdrop.current = false
+        }}
+        onPointerDown={(event) => {
+          pressedBackdrop.current = isDiscussionBackdrop(event)
+        }}
+        ref={dialogRef}
+      >
         <form onSubmit={handleSubmit}>
           <div className="discussion-dialog__heading">
             <div>
