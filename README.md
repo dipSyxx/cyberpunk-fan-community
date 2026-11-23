@@ -30,6 +30,7 @@ A responsive, mobile-first fan community built from the project’s Figma resear
 - District collections of two or three notes. Share a collection link, preview and save a received collection, and add its notes to your own district journal
 - Character dilemmas with a local response and shareable arguments. Save your own response to open a shared argument, then reveal story spoilers if you choose
 - Responsive desktop navigation and keyboard-accessible mobile menu
+- Browser-local account registration, login, and logout from the desktop navigation and mobile menu
 - Character reactions, favorites filtering, and a local five-star rating
 - District saving with a saved-only view, community likes, replies, and locally created discussions
 - Community spoiler protection, enabled by default. Mark posts with spoilers and reveal protected discussions individually
@@ -81,4 +82,6 @@ This is an unofficial, non-commercial school project. Cyberpunk 2077 and its cha
 
 ## Scope
 
-The project intentionally has no backend, authentication, database, real-time synchronization, or admin panel. Favorites, ratings, saved districts, community activity, and journal data are stored in the current browser. Players exchange individual district notes as files and share clues, relays, finding checks, observations, collections, and dilemma arguments as links. Each link contains the shared content at the time it was created. Players open and save the links they receive to add the shared content to their browser.
+The project runs without a backend, database, or admin panel. Local accounts use a username and password over HTTPS or localhost. The browser stores a salted password verifier and keeps the session across page reloads. Local accounts identify a session in the interface. Favorites, ratings, saved districts, community activity, and journals remain shared within the current browser profile. The pages are accessible as a guest.
+
+Players exchange individual district notes as files and share clues, relays, finding checks, observations, collections, and dilemma arguments as links. Each link contains the shared content at the time it was created. Players open and save the links they receive to add the shared content to their browser.

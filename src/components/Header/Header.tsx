@@ -1,6 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { localAuthKey, LocalAuthError, logOutLocally, readLocalUsername } from '../../data/localAuth'
+import { useTransientStatus } from '../../hooks/useTransientStatus'
+import { AccountControls } from '../Auth/AccountControls'
+import { AuthDialog, type AuthMode } from '../Auth/AuthDialog'
 import { GlitchContent } from '../Button/GlitchContent'
+import { InteractionStatus } from '../InteractionStatus/InteractionStatus'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
 
 const navigationItems = [
@@ -16,7 +21,65 @@ const desktopNavigationItems = navigationItems.filter(
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [authMode, setAuthMode] = useState<AuthMode | null>(null)
+  const [username, setUsername] = useState(readLocalUsername)
+  const [signingOut, setSigningOut] = useState(false)
+  const desktopNavRef = useRef<HTMLElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const restoreFocusRef = useRef<HTMLButtonElement | null>(null)
+  const { status, showStatus } = useTransientStatus()
   const closeMenu = useCallback(() => setMenuOpen(false), [])
+
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === localAuthKey || event.key === null) setUsername(readLocalUsername())
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
+  useEffect(() => {
+    const opener = restoreFocusRef.current
+    if (!opener || authMode || menuOpen || signingOut) return
+    restoreFocusRef.current = null
+    if (opener.isConnected && opener.getClientRects().length) {
+      opener.focus()
+    } else if (menuButtonRef.current?.getClientRects().length) {
+      menuButtonRef.current.focus()
+    } else {
+      desktopNavRef.current?.querySelector<HTMLButtonElement>('.account-controls button')?.focus()
+    }
+  }, [authMode, menuOpen, signingOut, username])
+
+  const openAuth = (mode: AuthMode, trigger: HTMLButtonElement) => {
+    restoreFocusRef.current = menuOpen ? menuButtonRef.current : trigger
+    closeMenu()
+    setAuthMode(mode)
+  }
+
+  const finishAuth = () => {
+    setUsername(readLocalUsername())
+    setAuthMode(null)
+    showStatus(authMode === 'register' ? 'Local account created.' : 'Logged in.')
+  }
+
+  const signOut = async (trigger: HTMLButtonElement) => {
+    if (!username || signingOut) return
+    restoreFocusRef.current = menuOpen ? menuButtonRef.current : trigger
+    setSigningOut(true)
+    try {
+      await logOutLocally(username)
+      showStatus('Logged out.')
+    } catch (error) {
+      showStatus(error instanceof LocalAuthError ? error.message : 'Could not log out. Please try again.')
+    } finally {
+      setUsername(readLocalUsername())
+      setSigningOut(false)
+      closeMenu()
+    }
+  }
+
+  const accountControls = <AccountControls username={username} signingOut={signingOut} onOpen={openAuth} onSignOut={signOut} />
 
   return (
     <>
@@ -29,7 +92,7 @@ export function Header() {
             <GlitchContent>Cyberpunk 2077</GlitchContent>
           </NavLink>
 
-          <nav aria-label="Primary navigation" className="desktop-navigation">
+          <nav aria-label="Primary navigation" className="desktop-navigation" ref={desktopNavRef}>
             {desktopNavigationItems.map((item) => (
               <NavLink
                 className={({ isActive }) =>
@@ -50,6 +113,7 @@ export function Header() {
             >
               <GlitchContent>Community</GlitchContent>
             </NavLink>
+            {accountControls}
           </nav>
 
           <button
@@ -59,13 +123,16 @@ export function Header() {
             aria-label="Open navigation menu"
             className="menu-button"
             onClick={() => setMenuOpen(true)}
+            ref={menuButtonRef}
             type="button"
           >
             <GlitchContent>Menu</GlitchContent>
           </button>
         </div>
       </header>
-      {menuOpen ? <MobileMenu onClose={closeMenu} /> : null}
+      {menuOpen && <MobileMenu accountControls={accountControls} onClose={closeMenu} />}
+      {authMode && <AuthDialog mode={authMode} onAuthenticated={finishAuth} onChangeMode={setAuthMode} onClose={() => setAuthMode(null)} />}
+      <InteractionStatus status={status} />
     </>
   )
 }

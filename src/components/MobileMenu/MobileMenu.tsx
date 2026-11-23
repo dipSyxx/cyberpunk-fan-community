@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { GlitchContent } from '../Button/GlitchContent'
 
 interface MobileMenuProps {
+  accountControls: ReactNode
   onClose: () => void
 }
 
@@ -13,7 +14,7 @@ const navigationItems = [
   { to: '/community', label: 'Community', end: false },
 ]
 
-export function MobileMenu({ onClose }: MobileMenuProps) {
+export function MobileMenu({ accountControls, onClose }: MobileMenuProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const { pathname } = useLocation()
 
@@ -102,6 +103,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
             </GlitchContent>
           </NavLink>
         ))}
+        {accountControls}
       </nav>
       <p className="mobile-menu__note">Your choices stay on this device</p>
     </dialog>

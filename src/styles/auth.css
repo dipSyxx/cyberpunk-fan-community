@@ -1,0 +1,137 @@
+.account-controls {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.account-controls button {
+  --cybr-content-background: var(--color-charcoal);
+  min-height: 2.75rem;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--color-cyan);
+  background: var(--cybr-content-background);
+  color: var(--color-cyan);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.account-controls .account-controls__register {
+  --cybr-content-background: var(--color-cyan);
+  color: var(--color-black);
+}
+
+.account-controls__username {
+  max-width: 8rem;
+  overflow: hidden;
+  color: var(--color-white);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-menu__nav .account-controls__username {
+  max-width: none;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.auth-dialog {
+  width: min(calc(100% - 2rem), 26rem);
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--color-cyan);
+  background: var(--color-charcoal);
+  color: var(--color-white);
+  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.72);
+}
+
+.auth-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.auth-dialog__panel {
+  display: grid;
+  gap: 0.875rem;
+  padding: clamp(0.875rem, 4vw, 1.5rem);
+}
+
+.auth-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.auth-dialog h2 {
+  color: var(--color-yellow);
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+
+.auth-dialog .dialog-close {
+  min-height: 2.75rem;
+}
+
+.auth-dialog__form {
+  gap: 0.875rem;
+}
+
+.auth-dialog__form input {
+  min-height: 2.75rem;
+}
+
+.auth-dialog #auth-dialog-description,
+.auth-dialog__hint {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.auth-dialog__error {
+  color: var(--color-white);
+  border-left: 2px solid var(--color-red);
+  padding-inline-start: 0.625rem;
+  font-size: 0.875rem;
+}
+
+.auth-dialog__switch {
+  --cybr-content-background: var(--color-charcoal);
+  width: fit-content;
+  min-height: 2.75rem;
+  padding: 0.25rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-cyan);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-align: left;
+}
+
+.account-controls button:disabled,
+.auth-dialog button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (min-width: 64rem) {
+  .desktop-navigation .account-controls {
+    padding-inline: 0.75rem;
+    flex-wrap: nowrap;
+    border-left: 1px solid var(--color-line);
+  }
+
+  .desktop-navigation .account-controls button:focus-visible {
+    outline-offset: -4px;
+    outline-color: var(--color-white);
+  }
+
+  .desktop-navigation .account-controls__register:focus-visible {
+    outline-color: var(--color-black);
+  }
+}
