@@ -38,6 +38,7 @@ export function DiscussionCard({
   const likes = discussion.likes + Number(liked)
   const replyCountLabel = `${localReplies.length} local ${localReplies.length === 1 ? 'reply' : 'replies'}`
   const replyDialogId = `reply-dialog-${discussion.id}`
+  const replyCountId = `reply-count-${discussion.id}`
 
   useEffect(() => {
     const dialog = replyDialogRef.current
@@ -117,14 +118,17 @@ export function DiscussionCard({
           </button>
           <button
             aria-controls={replyDialogId}
+            aria-describedby={replyCountId}
             aria-expanded={replyDialogOpen}
+            aria-haspopup="dialog"
             className="discussion-card__reply-toggle"
             onClick={onOpenReply}
             ref={replyButtonRef}
             type="button"
           >
-            <GlitchContent>Reply · {replyCountLabel}</GlitchContent>
+            <GlitchContent>Reply</GlitchContent>
           </button>
+          <span className="discussion-card__reply-count" id={replyCountId}>{replyCountLabel}</span>
         </div>
       </article>
 

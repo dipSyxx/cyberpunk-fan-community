@@ -50,7 +50,7 @@
   }
 
   .district-card,
-  .discussion-card {
+  .discussion-card--trending {
     height: clamp(8.25rem, 22vw, 10rem);
   }
 
