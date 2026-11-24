@@ -5,15 +5,10 @@ import { GlitchContent } from '../../components/Button/GlitchContent'
 import { DiscussionCard } from '../../components/DiscussionCard/DiscussionCard'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
-import { discussionHasSpoilers, discussions, hideSpoilersKey, type Discussion } from '../../data/discussions'
-import { readStoredValue, useLocalStorage, writeStoredValue } from '../../hooks/useLocalStorage'
+import type { Discussion } from '../../../shared/community'
+import { useCommunity } from '../../api/communityContext'
+import { errorMessage } from '../../api/transport'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
-
-interface LocalDiscussion extends Discussion {
-  createdLocally: true
-}
-
-const replyKey = (id: string) => `cyberpunk:discussion-replies:${id}`
 
 function isDiscussionBackdrop(event: MouseEvent<HTMLDialogElement>) {
   if (event.target !== event.currentTarget) return false
@@ -22,49 +17,40 @@ function isDiscussionBackdrop(event: MouseEvent<HTMLDialogElement>) {
 }
 
 export function Community() {
+  const { site: { profile, discussions: feed }, mutate } = useCommunity()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const pressedBackdrop = useRef(false)
   const activeSpoilerRef = useRef<HTMLElement>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const activeThread = searchParams.get('thread')
-  const [hideSpoilers, setHideSpoilers] = useLocalStorage(hideSpoilersKey, true)
+  const [guestHideSpoilers, setGuestHideSpoilers] = useState(true)
+  const hideSpoilers = profile?.hideSpoilers ?? guestHideSpoilers
   const [revealedDiscussions, setRevealedDiscussions] = useState<string[]>([])
-  const [localDiscussions, setLocalDiscussions] = useLocalStorage<
-    LocalDiscussion[]
-  >('cyberpunk:local-discussions', [])
-  const feed = [...localDiscussions, ...discussions]
-  const [repliesByDiscussion, setRepliesByDiscussion] = useState<Record<string, string[]>>(() =>
-    Object.fromEntries(feed.map(({ id }) => [id, readStoredValue<string[]>(replyKey(id), [])])),
-  )
-  const [, setHasParticipated] = useLocalStorage<boolean>(
-    'cyberpunk:community-participated',
-    false,
-  )
+  const [sending, setSending] = useState(false)
+  const [submissionError, setSubmissionError] = useState('')
   const { status, showStatus } = useTransientStatus()
-  const markParticipation = () => setHasParticipated(true)
-  const localDiscussionIds = new Set(localDiscussions.map(({ id }) => id))
-  const myActivity = feed.filter(({ id }) =>
-    localDiscussionIds.has(id) || (repliesByDiscussion[id]?.length ?? 0) > 0,
-  )
+  const myActivity = feed.filter(({ myActivity }) => myActivity)
   const isHidden = (discussion: Discussion) =>
-    hideSpoilers && discussionHasSpoilers(discussion) && !revealedDiscussions.includes(discussion.id)
+    hideSpoilers && discussion.spoiler && !revealedDiscussions.includes(discussion.id)
   const hiddenActive = feed.some((discussion) => discussion.id === activeThread && isHidden(discussion))
 
   useEffect(() => {
     if (hiddenActive) activeSpoilerRef.current?.focus()
   }, [activeThread, hiddenActive])
 
-  const saveReply = (id: string, reply: string) => {
-    const nextReplies = [...(repliesByDiscussion[id] ?? []), reply]
-    if (!writeStoredValue(replyKey(id), nextReplies)) return false
-
-    setRepliesByDiscussion((current) => ({ ...current, [id]: nextReplies }))
-    markParticipation()
-    return true
+  const setHideSpoilers = async (hidden: boolean) => {
+    try {
+      if (profile) await mutate('spoilers', { hidden }, 'site')
+      else setGuestHideSpoilers(hidden)
+      setRevealedDiscussions([])
+    } catch (error) {
+      showStatus(errorMessage(error))
+    }
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (sending) return
     const form = event.currentTarget
     const formData = new FormData(form)
     const title = String(formData.get('title') ?? '').trim()
@@ -72,41 +58,31 @@ export function Community() {
 
     if (!title || !excerpt) return
 
-    setLocalDiscussions((current) => [
-      {
-        id: `local-${Date.now()}`,
-        title,
-        excerpt,
-        author: 'local_merc',
-        time: 'Just now',
-        tag: 'Community',
-        likes: 0,
-        replies: 0,
-        spoiler: formData.get('spoiler') === 'on',
-        accent: 'cyan',
-        createdLocally: true,
-      },
-      ...current,
-    ])
-    markParticipation()
-    showStatus('Post added to your local community feed')
-
-    form.reset()
-    dialogRef.current?.close()
+    setSending(true)
+    setSubmissionError('')
+    try {
+      await mutate('discussion', { title, text: excerpt, spoiler: formData.get('spoiler') === 'on' }, 'site')
+      form.reset()
+      dialogRef.current?.close()
+      showStatus('Post published to Community')
+    } catch (error) {
+      setSubmissionError(errorMessage(error))
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
     <div className="figma-page figma-page--community">
       <header className="page-title community-heading">
         <div className="community-heading__copy">
-          <p className="community-kicker">Local prototype</p>
           <h1 className="glitch-heading glitch-heading--yellow">Community</h1>
-          <p>
-            Community prototype — posts, likes, and replies are stored only in
-            this browser.
-          </p>
+          <p>Share your take and discover what other fans are discussing.</p>
         </div>
-        <ActionButton onClick={() => dialogRef.current?.showModal()}>
+        <ActionButton onClick={() => {
+          if (profile) dialogRef.current?.showModal()
+          else showStatus('Log in to start a discussion.')
+        }}>
           + New post
         </ActionButton>
       </header>
@@ -114,10 +90,7 @@ export function Community() {
       <label className="community-spoiler-toggle">
         <input
           checked={hideSpoilers}
-          onChange={(event) => {
-            setHideSpoilers(event.target.checked)
-            setRevealedDiscussions([])
-          }}
+          onChange={(event) => void setHideSpoilers(event.target.checked)}
           type="checkbox"
         />
         <span>Hide story spoilers</span>
@@ -130,11 +103,7 @@ export function Community() {
             <ul>
               {myActivity.map((discussion) => {
                 const { id, title } = discussion
-                const replyCount = repliesByDiscussion[id]?.length ?? 0
-                const details = [
-                  localDiscussionIds.has(id) ? 'Your post' : '',
-                  replyCount ? `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}` : '',
-                ].filter(Boolean).join(' · ')
+                const details = discussion.mine ? 'Your post' : 'You replied'
 
                 return (
                   <li key={id}>
@@ -153,7 +122,7 @@ export function Community() {
 
         <section aria-label="Community discussions" className="discussion-list">
           {activeThread && !feed.some(({ id }) => id === activeThread) ? (
-            <p role="status">This discussion isn’t available in this browser.</p>
+            <p role="status">This discussion isn’t available.</p>
           ) : null}
           {feed.map((discussion) => isHidden(discussion) ? (
             <article
@@ -175,12 +144,9 @@ export function Community() {
             <DiscussionCard
               discussion={discussion}
               key={discussion.id}
-              localReplies={repliesByDiscussion[discussion.id] ?? []}
               onCloseReply={() => setSearchParams({}, { replace: true })}
               onFeedback={showStatus}
               onOpenReply={() => setSearchParams({ thread: discussion.id }, { replace: true })}
-              onParticipate={markParticipation}
-              onReply={(reply) => saveReply(discussion.id, reply)}
               replyDialogOpen={activeThread === discussion.id}
             />
           ))}
@@ -207,6 +173,7 @@ export function Community() {
       <InteractionStatus status={status} />
 
       <dialog
+        aria-labelledby="new-discussion-title"
         className="discussion-dialog"
         onClick={(event) => {
           if (pressedBackdrop.current && isDiscussionBackdrop(event)) event.currentTarget.close()
@@ -221,7 +188,7 @@ export function Community() {
           <div className="discussion-dialog__heading">
             <div>
               <p className="dialog-kicker">New transmission</p>
-              <h2>Start a discussion</h2>
+              <h2 id="new-discussion-title">Start a discussion</h2>
             </div>
             <button
               aria-label="Close discussion form"
@@ -233,7 +200,7 @@ export function Community() {
             </button>
           </div>
           <p className="discussion-dialog__note">
-            This prototype stores your post only in this browser.
+            Your post will be visible in Community.
           </p>
           <label htmlFor="discussion-title">Title</label>
           <input
@@ -264,10 +231,11 @@ export function Community() {
             >
               <GlitchContent>Cancel</GlitchContent>
             </button>
-            <button className="button button--primary" type="submit">
-              <GlitchContent>Post locally</GlitchContent>
+            <button className="button button--primary" disabled={sending} type="submit">
+              <GlitchContent>{sending ? 'Posting…' : 'Publish post'}</GlitchContent>
             </button>
           </div>
+          {submissionError && <p role="alert">{submissionError}</p>}
         </form>
       </dialog>
     </div>

@@ -7,9 +7,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start:api": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/index.ts",
+    "db:init": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/migrate.ts init",
+    "db:migrate": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/migrate.ts apply",
+    "db:status": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/migrate.ts status",
+    "test:integration": "node --test server/test/community.test.mjs"
   },
   "dependencies": {
+    "better-auth": "1.7.27",
+    "mysql2": "3.24.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4"

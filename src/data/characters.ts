@@ -1,55 +1,14 @@
 import johnnyImage from '../assets/images/johnny.png'
 import judyImage from '../assets/images/judy.png'
 import vImage from '../assets/images/v.jpeg'
+import type { CharacterRecord } from '../../shared/community'
 
-export interface Character {
-  id: string
-  name: string
-  role: string
-  category: 'merc' | 'rockerboy' | 'tech'
-  description: string
-  image: string
-  imageAlt: string
-  rating: number
-  accent: 'yellow' | 'cyan' | 'red'
-  imagePosition?: string
+const images = new Map([
+  ['v', vImage],
+  ['johnny-silverhand', johnnyImage],
+  ['judy-alvarez', judyImage],
+])
+
+export function withCharacterImage(character: CharacterRecord) {
+  return { ...character, image: images.get(character.imageKey) }
 }
-
-export const characters: Character[] = [
-  {
-    id: 'v',
-    name: 'V',
-    role: 'Mercenary',
-    category: 'merc',
-    description: 'Relic carrier · Afterlife regular',
-    image: vImage,
-    imageAlt: 'V seated in a dark Night City apartment',
-    rating: 2184,
-    accent: 'yellow',
-    imagePosition: 'center 30%',
-  },
-  {
-    id: 'johnny-silverhand',
-    name: 'Johnny Silverhand',
-    role: 'Rockerboy / Rebel',
-    category: 'rockerboy',
-    description: 'Rockerboy · Rebel · Digital ghost',
-    image: johnnyImage,
-    imageAlt: 'Johnny Silverhand standing beneath cold blue lights',
-    rating: 2417,
-    accent: 'cyan',
-    imagePosition: 'center 28%',
-  },
-  {
-    id: 'judy-alvarez',
-    name: 'Judy Alvarez',
-    role: 'Braindance Technician',
-    category: 'tech',
-    description: 'Braindance tech · Mox ally',
-    image: judyImage,
-    imageAlt: 'Judy Alvarez standing against a dark background',
-    rating: 1926,
-    accent: 'red',
-    imagePosition: 'center top',
-  },
-]

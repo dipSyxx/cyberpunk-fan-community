@@ -3,8 +3,9 @@ import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import { ActionButton } from '../../components/Button/Button'
 import { GlitchContent } from '../../components/Button/GlitchContent'
 import { exportDistrictEntry, journalNoteLimit, readDistrictEntry, type DistrictJournalEntry } from '../../data/districtJournal'
-import { districts, type District } from '../../data/districts'
-import { readStoredValue, writeStoredValue } from '../../hooks/useLocalStorage'
+import type { District, DistrictJournal as JournalData } from '../../../shared/community'
+import { useCommunity, useResource } from '../../api/communityContext'
+import { useFeedbackAction } from '../../api/useFeedbackAction'
 import { DistrictCollections } from './DistrictCollections'
 import { FindingChecks } from './FindingChecks'
 
@@ -12,49 +13,25 @@ const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium' })
 
 export function DistrictJournal() {
   const { districtId } = useParams()
+  const { site: { districts } } = useCommunity()
   const district = districts.find(({ id }) => id === districtId)
   return district ? <Journal key={district.id} district={district} /> : <Navigate to="/night-city" replace />
 }
 
 function Journal({ district }: { district: District }) {
   const { state } = useLocation()
-  const storageKey = `cyberpunk:district-journal:${district.id}`
-  const [entries, setEntries] = useState(() => readStoredValue<DistrictJournalEntry[]>(storageKey, []))
+  const { site: { profile } } = useCommunity()
+  const resource = useResource<JournalData>(profile ? `journal/${district.id}` : null)
+  const entries = resource.value?.entries ?? []
   const [draft, setDraft] = useState(() =>
     typeof state?.note === 'string' ? state.note.slice(0, journalNoteLimit) : '',
   )
   const [preview, setPreview] = useState<DistrictJournalEntry | null>(null)
-  const [message, setMessage] = useState('')
+  const { message, setMessage, save, busy } = useFeedbackAction()
   const [reading, setReading] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
 
-  const appendNotes = (incoming: DistrictJournalEntry[]) => {
-    const stored = readStoredValue(storageKey, entries)
-    const newEntries = incoming.filter(({ id }) => !stored.some((entry) => entry.id === id))
-    const next = [...newEntries, ...stored]
-    if (newEntries.length && !writeStoredValue(storageKey, next)) return false
-    setEntries(next)
-    return newEntries.length
-  }
-
-  const save = (entry: DistrictJournalEntry) => {
-    const count = appendNotes([entry])
-    if (count === false) {
-      setMessage('Could not save the journal in this browser. Try again.')
-      return false
-    }
-    if (count === 0) {
-      setMessage('This note is already in your district journal.')
-      return false
-    }
-
-    setMessage('Note added to the district journal.')
-    return true
-  }
-
-  const importNotes = (notes: DistrictJournalEntry[]) => appendNotes(notes.map((note) => ({ ...note, imported: true })))
-
-  const addNote = (event: FormEvent<HTMLFormElement>) => {
+  const addNote = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const note = draft.trim()
     if (!note || note.length > journalNoteLimit) {
@@ -62,7 +39,11 @@ function Journal({ district }: { district: District }) {
       return
     }
 
-    if (save({ id: crypto.randomUUID(), note, createdAt: new Date().toISOString() })) setDraft('')
+    if (await save('journal-note', { districtId: district.id, note }, 'Note added to the district journal.')) setDraft('')
+  }
+
+  async function importNote(entry: DistrictJournalEntry) {
+    if (await save('import-note', { districtId: district.id, entry }, 'Note added to the district journal.')) setPreview(null)
   }
 
   const loadFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -109,14 +90,17 @@ function Journal({ district }: { district: District }) {
     <div className="figma-page district-journal-page">
       <header className="page-title">
         <h1 className="glitch-heading glitch-heading--yellow">{district.name} journal</h1>
-        <p>Keep local finds, or exchange individual note files with friends.</p>
+        <p>Keep private notes or exchange individual note files with friends.</p>
         <Link className="outings__journal-link" to="/night-city"><GlitchContent>Back to districts</GlitchContent></Link>
       </header>
 
       <div className="district-journal-layout">
         <section aria-labelledby="district-notes-title" className="outing-journal">
           <h2 id="district-notes-title">District notes</h2>
-          {entries.length > 0 ? (
+          {!profile ? <p>Log in to view and add your district notes.</p>
+            : resource.loading ? <p role="status">Loading notes…</p>
+            : resource.error ? <div role="alert">{resource.error.message} <button onClick={resource.retry} type="button">Retry</button></div>
+            : entries.length > 0 ? (
             <ol>
               {entries.map((entry) => (
                 <li key={entry.id}>
@@ -134,9 +118,9 @@ function Journal({ district }: { district: District }) {
         </section>
 
         <div className="district-journal-tools">
-          <section aria-labelledby="district-add-title" className="journal-panel">
+          {profile && <><section aria-labelledby="district-add-title" className="journal-panel">
             <h2 id="district-add-title">Add a find</h2>
-            <form className="journal-form" onSubmit={addNote}>
+            <form className="journal-form" onSubmit={(event) => void addNote(event)}>
               <label htmlFor="district-note">Your finding</label>
               <textarea
                 id="district-note"
@@ -146,7 +130,7 @@ function Journal({ district }: { district: District }) {
                 rows={4}
                 value={draft}
               />
-              <ActionButton type="submit">Add to journal</ActionButton>
+              <ActionButton disabled={busy} type="submit">Add to journal</ActionButton>
             </form>
           </section>
 
@@ -159,9 +143,7 @@ function Journal({ district }: { district: District }) {
                 <h3>Import preview</h3>
                 <p>{preview.note}</p>
                 <div className="outings__actions">
-                  <ActionButton onClick={() => {
-                    if (save(preview)) setPreview(null)
-                  }}>Add imported note</ActionButton>
+                  <ActionButton disabled={busy} onClick={() => void importNote(preview)}>Add imported note</ActionButton>
                   <ActionButton onClick={() => {
                     setPreview(null)
                     setMessage('Import discarded.')
@@ -169,10 +151,10 @@ function Journal({ district }: { district: District }) {
                 </div>
               </div>
             )}
-          </section>
+          </section></>}
           <p className="district-journal-status" role="status">{message}</p>
-          <FindingChecks addNotes={importNotes} districtId={district.id} entries={entries} />
-          <DistrictCollections addNotes={importNotes} districtId={district.id} entries={entries} />
+          <FindingChecks checks={resource.value?.checks ?? []} districtId={district.id} entries={entries} />
+          <DistrictCollections collections={resource.value?.collections ?? []} districtId={district.id} entries={entries} />
         </div>
       </div>
     </div>

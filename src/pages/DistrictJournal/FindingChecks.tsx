@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ActionButton } from '../../components/Button/Button'
-import { ShareLink } from '../../components/ShareLink/ShareLink'
-import { journalNoteLimit, type DistrictJournalEntry } from '../../data/districtJournal'
-import {
-  findingPlaceLimit, findingResults, makeFindingLink, readFindingResult, readSharedFinding, sameFinding,
-  type FindingCheck, type FindingReport, type SharedFinding,
-} from '../../data/districtShares'
+import { ServerShareLink } from '../../components/ShareLink/ServerShareLink'
+import type { FindingCheck, FindingObservation, JournalEntry, SharedFinding } from '../../../shared/community'
+import { useCommunity, useResource } from '../../api/communityContext'
+import { sharedToken } from '../../api/share'
+import { useFeedbackAction } from '../../api/useFeedbackAction'
+import { districtJournalPath, journalNoteLimit } from '../../data/districtJournal'
+import { findingPlaceLimit, findingResults, readFindingResult, readSharedFinding } from '../../data/districtShares'
 import { readInGameTime } from '../../data/outings'
 import { readShareText } from '../../data/shareLinks'
-import { readStoredValue, writeStoredValue } from '../../hooks/useLocalStorage'
 
-function reportLabel(report: FindingReport) {
+function reportLabel(report: FindingObservation) {
   return `${report.time === 'day' ? 'Day' : 'Night'} · ${findingResults[report.result]}`
 }
 
@@ -30,54 +30,36 @@ function TimeField({ label }: { label: string }) {
 
 interface FindingChecksProps {
   districtId: string
-  entries: DistrictJournalEntry[]
-  addNotes: (entries: DistrictJournalEntry[]) => number | false
+  entries: JournalEntry[]
+  checks: FindingCheck[]
 }
 
-export function FindingChecks({ districtId, entries, addNotes }: FindingChecksProps) {
+export function FindingChecks({ districtId, entries, checks }: FindingChecksProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const storageKey = `cyberpunk:finding-checks:${districtId}`
-  const [checks, setChecks] = useState(() => readStoredValue<FindingCheck[]>(storageKey, []))
-  const [message, setMessage] = useState('')
+  const { site: { profile } } = useCommunity()
+  const { message, setMessage, busy, save } = useFeedbackAction()
   const [reportingId, setReportingId] = useState<string | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
-  const hasLink = location.hash.startsWith('#finding=')
-  const incoming = hasLink ? readSharedFinding(location.hash, districtId) : null
+  const observationToken = sharedToken(location.hash, 'observation')
+  const token = observationToken ?? sharedToken(location.hash, 'check')
+  const kind = observationToken ? 'observation' : 'check'
+  const hasLink = Boolean(token) || location.hash.startsWith('#finding=')
+  const shared = useResource<SharedFinding>(token ? 'shared/' + kind : null, token)
+  const incoming = token ? shared.value?.districtId === districtId ? shared.value : null
+    : hasLink ? readSharedFinding(location.hash, districtId) : null
+  const path = districtJournalPath(districtId)
 
   useEffect(() => {
     if (hasLink) previewRef.current?.focus()
   }, [hasLink, location.hash])
 
-  const save = ({ request, report }: SharedFinding) => {
-    const stored = readStoredValue(storageKey, checks)
-    const existing = stored.find((check) => check.request.id === request.id)
-    if (existing && !sameFinding(existing.request, request)) {
-      setMessage('This link differs from the finding check already saved in this browser.')
-      return false
-    }
-
-    if (existing && (!report || existing.reports.some(({ id }) => report.id === id))) {
-      setChecks(stored)
-      setMessage(report ? 'This observation is already saved.' : 'This finding check is already saved.')
-      return true
-    }
-
-    const updated = { request, reports: report ? [report, ...(existing?.reports ?? [])] : [] }
-    const next = existing
-      ? stored.map((check) => check === existing ? updated : check)
-      : [updated, ...stored]
-    if (!writeStoredValue(storageKey, next)) {
-      setMessage('Could not save the finding check in this browser.')
-      return false
-    }
-
-    setChecks(next)
-    setMessage(report ? 'Observation saved.' : 'Finding check saved.')
-    return true
+  async function saveIncoming(value: SharedFinding) {
+    if (await save('save-finding', { districtId, ...(token ? { kind, token } : { legacy: value }) },
+      value.report ? 'Observation saved.' : 'Finding check saved.')) closePreview()
   }
 
-  const createRequest = (event: FormEvent<HTMLFormElement>) => {
+  const createRequest = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = event.currentTarget
     const data = new FormData(form)
@@ -88,10 +70,10 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
       setMessage('Choose a note, describe the location, and choose day or night.')
       return
     }
-    if (save({ request: { id: crypto.randomUUID(), note: entry.note, place, time } })) form.reset()
+    if (await save('create-finding', { districtId, entryId: entry.id, place, time }, 'Finding check saved.')) form.reset()
   }
 
-  const addObservation = (event: FormEvent<HTMLFormElement>, check: FindingCheck) => {
+  const addObservation = async (event: FormEvent<HTMLFormElement>, check: FindingCheck) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const result = readFindingResult(data.get('result'))
@@ -101,8 +83,7 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
       setMessage('Choose a time and result, then describe what you found.')
       return
     }
-    const report = { id: crypto.randomUUID(), result, time, note, createdAt: new Date().toISOString() }
-    if (save({ request: check.request, report })) setReportingId(null)
+    if (await save('add-observation', { checkId: check.request.id, result, time, note }, 'Observation saved.')) setReportingId(null)
   }
 
   const closePreview = () => navigate({ pathname: location.pathname, search: location.search, hash: '' }, { replace: true })
@@ -119,9 +100,9 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
               <p>{incoming.request.note}</p>
               {incoming.report && <p><strong>{reportLabel(incoming.report)}</strong><br />{incoming.report.note}</p>}
             </>
-          ) : <p role="status">This finding link is invalid or belongs to another district.</p>}
+          ) : <p role="status">{shared.loading ? "Opening finding?" : shared.error?.message ?? "This finding link is invalid or belongs to another district."}</p>}
           <div className="outings__actions">
-            {incoming && <ActionButton onClick={() => { if (save(incoming)) closePreview() }}>Save {incoming.report ? 'shared observation' : 'finding check'}</ActionButton>}
+            {incoming && (profile ? <ActionButton disabled={busy} onClick={() => void saveIncoming(incoming)}>Save {incoming.report ? 'shared observation' : 'finding check'}</ActionButton> : <p>Log in to save this finding.</p>)}
             <ActionButton onClick={closePreview} variant="secondary">Close preview</ActionButton>
           </div>
         </div>
@@ -129,7 +110,7 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
       {entries.length > 0 && (
         <details>
           <summary>Ask fans to check a find</summary>
-          <form className="journal-form" onSubmit={createRequest}>
+          <form className="journal-form" onSubmit={(event) => void createRequest(event)}>
             <label className="journal-field">
               Journal note
               <select name="entry" required defaultValue="">
@@ -139,7 +120,7 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
             </label>
             <label className="journal-field">Where to look<input maxLength={findingPlaceLimit} name="place" required /></label>
             <TimeField label="When you saw it" />
-            <ActionButton type="submit">Create finding check</ActionButton>
+            <ActionButton disabled={busy} type="submit">Create finding check</ActionButton>
           </form>
         </details>
       )}
@@ -150,7 +131,7 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
           <p>{check.request.note}</p>
           <details>
             <summary>Share finding check</summary>
-            <ShareLink label="Finding check link" link={makeFindingLink(districtId, check.request)} />
+            <ServerShareLink label="Finding check link" path={path} name="check" action="share-check" data={{ id: check.request.id }} token={check.request.token} />
           </details>
           {check.reports.map((report) => (
             <div className="journal-panel" key={report.id}>
@@ -158,19 +139,15 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
               <p>{report.note}</p>
               <details>
                 <summary>Share observation</summary>
-                <ShareLink label="Observation link" link={makeFindingLink(districtId, check.request, report)} />
+                <ServerShareLink label="Observation link" path={path} name="observation" action="share-observation" data={{ id: report.id }} token={report.token} />
               </details>
-              {!entries.some(({ id }) => id === report.id) && (
-                <ActionButton onClick={() => {
-                  const count = addNotes([{ id: report.id, note: report.note, createdAt: report.createdAt }])
-                  if (count === false) setMessage('Could not add the observation to district notes.')
-                  else setMessage(count ? 'Observation added to district notes.' : 'This observation is already in district notes.')
-                }} variant="secondary">Add observation to district notes</ActionButton>
+              {!entries.some(({ id }) => id === report.sourceId) && (
+                <ActionButton disabled={busy} onClick={() => void save('copy-observation', { id: report.id }, 'Observation added to district notes.')} variant="secondary">Add observation to district notes</ActionButton>
               )}
             </div>
           ))}
           {reportingId === check.request.id ? (
-            <form className="journal-form" onSubmit={(event) => addObservation(event, check)}>
+            <form className="journal-form" onSubmit={(event) => void addObservation(event, check)}>
               <TimeField label="When you checked" />
               <label className="journal-field">
                 Result
@@ -181,7 +158,7 @@ export function FindingChecks({ districtId, entries, addNotes }: FindingChecksPr
               </label>
               <label className="journal-field">What you noticed<textarea maxLength={journalNoteLimit} name="note" required rows={3} /></label>
               <div className="outings__actions">
-                <ActionButton type="submit">Save observation</ActionButton>
+                <ActionButton disabled={busy} type="submit">Save observation</ActionButton>
                 <ActionButton onClick={() => setReportingId(null)} variant="secondary">Cancel</ActionButton>
               </div>
             </form>

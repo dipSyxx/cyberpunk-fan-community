@@ -1,8 +1,8 @@
-import type { Character } from '../../data/characters'
+import type { withCharacterImage } from '../../data/characters'
 import { GlitchContent } from '../Button/GlitchContent'
 
 interface CharacterCardProps {
-  character: Character
+  character: ReturnType<typeof withCharacterImage>
   isFavorite: boolean
   onToggleFavorite: (id: string) => void
 }
@@ -34,7 +34,7 @@ export function CharacterCard({
         alt={character.imageAlt}
         className="character-card__image"
         src={character.image}
-        style={{ objectPosition: character.imagePosition }}
+        style={{ objectPosition: character.imagePosition ?? undefined }}
       />
       <span className="character-card__shade" aria-hidden="true" />
       <div className="character-card__body">

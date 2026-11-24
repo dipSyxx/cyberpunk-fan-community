@@ -1,0 +1,18 @@
+# Replace the tunnel UUID, API hostname, Access team name, and application audience.
+tunnel: "00000000-0000-4000-8000-000000000000"
+credentials-file: /run/credentials/cyberpunk-cloudflared.service/tunnel.json
+protocol: http2
+metrics: 127.0.0.1:20241
+
+ingress:
+  - hostname: api.example.com
+    path: "^/api/"
+    service: http://127.0.0.1:3081
+    originRequest:
+      httpHostHeader: cyberpunk-tunnel.internal
+      access:
+        required: true
+        teamName: example-team
+        audTag:
+          - "replace-with-access-application-audience"
+  - service: http_status:404

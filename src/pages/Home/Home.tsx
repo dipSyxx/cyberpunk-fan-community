@@ -5,9 +5,8 @@ import { GlitchContent } from '../../components/Button/GlitchContent'
 import { Outings } from '../../components/Outings/Outings'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
-import { characters } from '../../data/characters'
-import { districts } from '../../data/districts'
-import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { useCommunity } from '../../api/communityContext'
+import { LegacyImport } from '../../components/Auth/LegacyImport'
 
 const favoritesPath = '/characters?filter=favorites'
 const savedDistrictsPath = '/night-city?filter=saved'
@@ -21,26 +20,9 @@ interface Mission {
 }
 
 export function Home() {
-  const [favoriteCharacterIds] = useLocalStorage<string[]>(
-    'cyberpunk:favorite-characters',
-    [],
-  )
-  const [savedDistrictIds] = useLocalStorage<string[]>(
-    'cyberpunk:saved-districts',
-    [],
-  )
-  const [characterRating] = useLocalStorage<number>(
-    'cyberpunk:character-rating',
-    0,
-  )
-  const [localDiscussions] = useLocalStorage<unknown[]>(
-    'cyberpunk:local-discussions',
-    [],
-  )
-  const [hasParticipated] = useLocalStorage<boolean>(
-    'cyberpunk:community-participated',
-    false,
-  )
+  const { site: { profile, characters, districts, favoriteCharacters: favoriteCharacterIds,
+    savedDistricts: savedDistrictIds, rating: characterRating, discussions } } = useCommunity()
+  const myPosts = discussions.filter((discussion) => discussion.mine)
 
   const favoriteCharacters = characters.filter(({ id }) => favoriteCharacterIds.includes(id))
   const savedDistricts = districts.filter(({ id }) => savedDistrictIds.includes(id))
@@ -66,11 +48,11 @@ export function Home() {
     {
       label: 'Join a discussion',
       description:
-        hasParticipated || localDiscussions.length > 0
-          ? 'Local activity recorded'
+        profile?.participated
+          ? 'Community activity recorded'
           : 'Like, reply, or create a post',
       to: '/community',
-      complete: hasParticipated || localDiscussions.length > 0,
+      complete: Boolean(profile?.participated),
       accent: 'red',
     },
   ]
@@ -89,11 +71,11 @@ export function Home() {
       </section>
 
       <section className="home-copy">
-        <p className="home-copy__kicker">Local fan profile</p>
+        <p className="home-copy__kicker">Night City fan community</p>
         <h1 className="glitch-heading">Make Night City yours</h1>
         <p>
           Choose your allies, save the districts you love, and join the fan
-          conversation. Everything is stored locally on this device.
+          conversation. Sign in to save your progress across devices.
         </p>
         <LinkButton to="/characters">Build my profile</LinkButton>
       </section>
@@ -101,7 +83,7 @@ export function Home() {
       <section aria-labelledby="profile-title" className="night-profile">
         <header className="night-profile__heading">
           <div>
-            <p>Your local profile</p>
+            {profile && <p>@{profile.username}</p>}
             <h2 id="profile-title">Your Night City</h2>
           </div>
           <p className="night-profile__progress-copy">
@@ -144,18 +126,19 @@ export function Home() {
             <dd>{characterRating ? `${characterRating} / 5` : '—'}</dd>
           </div>
           <div>
-            <dt>Local posts</dt>
-            <dd>{localDiscussions.length}</dd>
+            <dt>Your posts</dt>
+            <dd>{myPosts.length}</dd>
           </div>
         </dl>
 
         <RelatedDiscussions favoriteCharacterIds={favoriteCharacterIds} savedDistrictIds={savedDistrictIds} />
+        {profile && <LegacyImport username={profile.username} />}
       </section>
 
       <section className="journey-section">
         <div className="journey-section__heading">
           <h2>Continue your journey</h2>
-          <p>Complete all three steps to shape your local Night City profile.</p>
+          <p>Complete all three steps to shape your Night City profile.</p>
         </div>
         <nav aria-label="Your Night City missions" className="mission-grid">
           {missions.map((mission, index) => (

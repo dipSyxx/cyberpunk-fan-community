@@ -1,54 +1,42 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ActionButton } from '../../components/Button/Button'
-import { ShareLink } from '../../components/ShareLink/ShareLink'
-import type { DistrictJournalEntry } from '../../data/districtJournal'
-import { districtCollectionLimit, makeCollectionLink, readSharedCollection, type DistrictCollection } from '../../data/districtShares'
+import { ServerShareLink } from '../../components/ShareLink/ServerShareLink'
+import type { Collection, JournalEntry } from '../../../shared/community'
+import { useCommunity, useResource } from '../../api/communityContext'
+import { sharedToken } from '../../api/share'
+import { useFeedbackAction } from '../../api/useFeedbackAction'
+import { districtJournalPath } from '../../data/districtJournal'
+import { districtCollectionLimit, readSharedCollection } from '../../data/districtShares'
 import { readShareText, shareTitleLimit } from '../../data/shareLinks'
-import { readStoredValue, writeStoredValue } from '../../hooks/useLocalStorage'
 
-function CollectionNotes({ entries }: { entries: DistrictJournalEntry[] }) {
+function CollectionNotes({ entries }: { entries: JournalEntry[] }) {
   return <ol className="journal-notes">{entries.map(({ id, note }) => <li key={id}>{note}</li>)}</ol>
 }
 
 interface DistrictCollectionsProps {
   districtId: string
-  entries: DistrictJournalEntry[]
-  addNotes: (entries: DistrictJournalEntry[]) => number | false
+  entries: JournalEntry[]
+  collections: Collection[]
 }
 
-export function DistrictCollections({ districtId, entries, addNotes }: DistrictCollectionsProps) {
+export function DistrictCollections({ districtId, entries, collections }: DistrictCollectionsProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const storageKey = `cyberpunk:district-collections:${districtId}`
-  const [collections, setCollections] = useState(() => readStoredValue<DistrictCollection[]>(storageKey, []))
-  const [message, setMessage] = useState('')
+  const { site: { profile } } = useCommunity()
+  const { message, setMessage, busy, save } = useFeedbackAction()
   const previewRef = useRef<HTMLDivElement>(null)
-  const hasLink = location.hash.startsWith('#collection=')
-  const incoming = hasLink ? readSharedCollection(location.hash, districtId) : null
+  const token = sharedToken(location.hash, 'collection')
+  const hasLink = Boolean(token) || location.hash.startsWith('#collection=')
+  const shared = useResource<{ districtId: string, collection: Collection }>(token ? 'shared/collection' : null, token)
+  const incoming = token ? shared.value?.districtId === districtId ? shared.value.collection : null
+    : hasLink ? readSharedCollection(location.hash, districtId) : null
 
   useEffect(() => {
     if (hasLink) previewRef.current?.focus()
   }, [hasLink, location.hash])
 
-  const save = (collection: DistrictCollection) => {
-    const stored = readStoredValue(storageKey, collections)
-    if (stored.some(({ id }) => id === collection.id)) {
-      setCollections(stored)
-      setMessage('This collection is already saved.')
-      return true
-    }
-    const next = [collection, ...stored]
-    if (!writeStoredValue(storageKey, next)) {
-      setMessage('Could not save the collection in this browser.')
-      return false
-    }
-    setCollections(next)
-    setMessage('Collection saved.')
-    return true
-  }
-
-  const createCollection = (event: FormEvent<HTMLFormElement>) => {
+  const createCollection = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = event.currentTarget
     const data = new FormData(form)
@@ -56,10 +44,14 @@ export function DistrictCollections({ districtId, entries, addNotes }: DistrictC
     const ids = new Set(data.getAll('entry'))
     const selected = entries.filter(({ id }) => ids.has(id))
     if (!title || selected.length < 2 || selected.length > districtCollectionLimit) {
-      setMessage(`Name your collection and choose 2–${districtCollectionLimit} notes.`)
+      setMessage('Name the collection and choose two or three notes.')
       return
     }
-    if (save({ id: crypto.randomUUID(), title, entries: selected })) form.reset()
+    if (await save('create-collection', { districtId, title, entries: selected.map(({ id }) => id) }, 'Collection saved.')) form.reset()
+  }
+
+  async function saveIncoming(value: Collection) {
+    if (await save('save-collection', { districtId, ...(token ? { token } : { legacy: value }) }, 'Collection saved.')) closePreview()
   }
 
   const closePreview = () => navigate({ pathname: location.pathname, search: location.search, hash: '' }, { replace: true })
@@ -70,9 +62,9 @@ export function DistrictCollections({ districtId, entries, addNotes }: DistrictC
       {hasLink && (
         <div className="journal-panel journal-panel--preview" ref={previewRef} tabIndex={-1}>
           <h3>{incoming?.title ?? 'Shared collection'}</h3>
-          {incoming ? <CollectionNotes entries={incoming.entries} /> : <p role="status">This collection link is invalid or belongs to another district.</p>}
+          {incoming ? <CollectionNotes entries={incoming.entries} /> : <p role="status">{shared.loading ? "Opening collection?" : shared.error?.message ?? "This collection link is invalid or belongs to another district."}</p>}
           <div className="outings__actions">
-            {incoming && <ActionButton onClick={() => { if (save(incoming)) closePreview() }}>Save collection</ActionButton>}
+            {incoming && (profile ? <ActionButton disabled={busy} onClick={() => void saveIncoming(incoming)}>Save collection</ActionButton> : <p>Log in to save this collection.</p>)}
             <ActionButton onClick={closePreview} variant="secondary">Close preview</ActionButton>
           </div>
         </div>
@@ -80,7 +72,7 @@ export function DistrictCollections({ districtId, entries, addNotes }: DistrictC
       {entries.length >= 2 ? (
         <details>
           <summary>Build a collection</summary>
-          <form className="journal-form" onSubmit={createCollection}>
+          <form className="journal-form" onSubmit={(event) => void createCollection(event)}>
             <label className="journal-field">Collection title<input maxLength={shareTitleLimit} name="title" required /></label>
             <fieldset className="journal-choices">
               <legend>Choose 2–{districtCollectionLimit} notes</legend>
@@ -88,7 +80,7 @@ export function DistrictCollections({ districtId, entries, addNotes }: DistrictC
                 <label key={id}><input name="entry" type="checkbox" value={id} /><span>{note}</span></label>
               ))}
             </fieldset>
-            <ActionButton type="submit">Create collection</ActionButton>
+            <ActionButton disabled={busy} type="submit">Create collection</ActionButton>
           </form>
         </details>
       ) : !collections.length && !hasLink && <p>Add two district notes to build a collection.</p>}
@@ -98,14 +90,10 @@ export function DistrictCollections({ districtId, entries, addNotes }: DistrictC
           <CollectionNotes entries={collection.entries} />
           <details>
             <summary>Share collection</summary>
-            <ShareLink label="Collection link" link={makeCollectionLink(districtId, collection)} />
+            <ServerShareLink label="Collection link" path={districtJournalPath(districtId)} name="collection" action="share-collection" data={{ id: collection.id }} token={collection.token} />
           </details>
           {collection.entries.some(({ id }) => !entries.some((entry) => entry.id === id)) && (
-            <ActionButton onClick={() => {
-              const count = addNotes(collection.entries)
-              if (count === false) setMessage('Could not add notes to this journal.')
-              else setMessage(count ? `Notes added to your journal (${count}).` : 'These notes are already in your journal.')
-            }} variant="secondary">Add notes to journal</ActionButton>
+            <ActionButton disabled={busy} onClick={() => void save('copy-collection', { id: collection.id }, 'Notes added to your journal.')} variant="secondary">Add notes to journal</ActionButton>
           )}
         </article>
       ))}

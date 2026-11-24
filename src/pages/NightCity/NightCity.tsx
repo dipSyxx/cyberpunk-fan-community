@@ -4,38 +4,33 @@ import { GlitchContent } from '../../components/Button/GlitchContent'
 import { InteractionStatus } from '../../components/InteractionStatus/InteractionStatus'
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
-import { districts } from '../../data/districts'
+import { useCommunity } from '../../api/communityContext'
+import { errorMessage } from '../../api/transport'
 import { districtJournalPath } from '../../data/districtJournal'
-import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
 
 export function NightCity() {
   const [searchParams, setSearchParams] = useSearchParams()
   const showSaved = searchParams.get('filter') === 'saved'
-  const [savedDistricts, setSavedDistricts] = useLocalStorage<string[]>(
-    'cyberpunk:saved-districts',
-    [],
-  )
+  const { site: { districts, savedDistricts }, mutate } = useCommunity()
   const { status, showStatus } = useTransientStatus()
   const saved = districts.filter(({ id }) => savedDistricts.includes(id))
   const visibleDistricts = showSaved ? saved : districts
 
-  const toggleDistrict = (id: string) => {
+  const toggleDistrict = async (id: string) => {
     const district = districts.find((item) => item.id === id)
     const isSaved = savedDistricts.includes(id)
 
-    setSavedDistricts((current) =>
-      current.includes(id)
-        ? current.filter((districtId) => districtId !== id)
-        : [...current, id],
-    )
-
-    if (district) {
+    if (!district) return
+    try {
+      await mutate('district', { id, selected: !isSaved }, 'site')
       showStatus(
         isSaved
           ? `${district.name} removed from Your Night City`
           : `${district.name} saved to Your Night City`,
       )
+    } catch (error) {
+      showStatus(errorMessage(error))
     }
   }
 
@@ -122,7 +117,7 @@ export function NightCity() {
                   aria-label={`${isSaved ? 'Remove' : 'Save'} ${district.name} ${isSaved ? 'from' : 'to'} saved districts`}
                   aria-pressed={isSaved}
                   className="district-card__save"
-                  onClick={() => toggleDistrict(district.id)}
+                  onClick={() => void toggleDistrict(district.id)}
                   type="button"
                 >
                   <GlitchContent>

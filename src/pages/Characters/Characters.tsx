@@ -6,12 +6,14 @@ import { InteractionStatus } from '../../components/InteractionStatus/Interactio
 import { PageMarker } from '../../components/PageMarker/PageMarker'
 import { ReactionButton } from '../../components/ReactionButton/ReactionButton'
 import { RelatedDiscussions } from '../../components/RelatedDiscussions/RelatedDiscussions'
-import { characters, type Character } from '../../data/characters'
-import { useLocalStorage } from '../../hooks/useLocalStorage'
+import type { CharacterRecord } from '../../../shared/community'
+import { withCharacterImage } from '../../data/characters'
+import { useCommunity } from '../../api/communityContext'
+import { errorMessage } from '../../api/transport'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
 import { CharacterDilemmas } from './CharacterDilemmas'
 
-type CharacterFilter = 'all' | 'favorites' | Character['category']
+type CharacterFilter = 'all' | 'favorites' | CharacterRecord['category']
 
 const filters: Array<{ value: CharacterFilter; label: string }> = [
   { value: 'all', label: 'All' },
@@ -25,14 +27,7 @@ export function Characters() {
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedFilter = searchParams.get('filter')
   const filter = filters.find(({ value }) => value === requestedFilter)?.value ?? 'all'
-  const [favorites, setFavorites] = useLocalStorage<string[]>(
-    'cyberpunk:favorite-characters',
-    [],
-  )
-  const [rating, setRating] = useLocalStorage<number>(
-    'cyberpunk:character-rating',
-    0,
-  )
+  const { site: { characters, favoriteCharacters: favorites, rating, ratingAverage, poll }, mutate } = useCommunity()
   const { status, showStatus } = useTransientStatus()
 
   const visibleCharacters = useMemo(() => {
@@ -42,24 +37,31 @@ export function Characters() {
 
     if (filter === 'all') return characters
     return characters.filter((character) => character.category === filter)
-  }, [favorites, filter])
+  }, [characters, favorites, filter])
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = async (id: string) => {
     const character = characters.find((item) => item.id === id)
     const isFavorite = favorites.includes(id)
 
-    setFavorites((current) =>
-      current.includes(id)
-        ? current.filter((favoriteId) => favoriteId !== id)
-        : [...current, id],
-    )
-
-    if (character) {
+    if (!character) return
+    try {
+      await mutate('favorite', { id, selected: !isFavorite }, 'site')
       showStatus(
         isFavorite
           ? `${character.name} removed from Your Night City`
           : `${character.name} added to Your Night City`,
       )
+    } catch (error) {
+      showStatus(errorMessage(error))
+    }
+  }
+
+  const rate = async (value: number) => {
+    try {
+      await mutate('rating', { rating: value }, 'site')
+      showStatus(`Your rating: ${value} / 5`)
+    } catch (error) {
+      showStatus(errorMessage(error))
     }
   }
 
@@ -77,7 +79,7 @@ export function Characters() {
             dilemmaParams.set('dilemma', character.id)
             return (
               <div className="character-profile" key={character.id}>
-                <CharacterCard character={character} isFavorite={favorites.includes(character.id)} onToggleFavorite={toggleFavorite} />
+                <CharacterCard character={withCharacterImage(character)} isFavorite={favorites.includes(character.id)} onToggleFavorite={(id) => void toggleFavorite(id)} />
                 <Link className="outings__journal-link" to={`?${dilemmaParams.toString()}#character-dilemmas-title`}>
                   <GlitchContent>Open dilemma for {character.name}</GlitchContent>
                 </Link>
@@ -98,28 +100,7 @@ export function Characters() {
       <section className="favorite-prompt">
         <h2 className="section-label section-label--white">Fan poll</h2>
         <div className="favorite-prompt__reactions">
-          <ReactionButton
-            activeLabel="Johnny"
-            compactCount
-            initialCount={2400}
-            label="Johnny"
-            storageKey="character:johnny-silverhand"
-          />
-          <ReactionButton
-            activeLabel="Judy"
-            compactCount
-            initialCount={1900}
-            label="Judy"
-            storageKey="character:judy-alvarez"
-            symbol="★"
-          />
-          <ReactionButton
-            activeLabel="Panam"
-            compactCount
-            initialCount={1700}
-            label="Panam"
-            storageKey="character:panam-palmer"
-          />
+          {poll.map((option) => <ReactionButton key={option.id} option={option} onError={showStatus} />)}
         </div>
       </section>
 
@@ -151,10 +132,7 @@ export function Characters() {
                 aria-checked={rating === value}
                 className={value <= rating ? 'is-active' : undefined}
                 key={value}
-                onClick={() => {
-                  setRating(value)
-                  showStatus(`Your rating: ${value} / 5`)
-                }}
+                onClick={() => void rate(value)}
                 role="radio"
                 type="button"
               >
@@ -162,7 +140,7 @@ export function Characters() {
               </button>
             ))}
           </div>
-          <p>{rating ? `Your rating: ${rating} / 5` : '4.8 / 5 community average'}</p>
+          <p>{rating ? `Your rating: ${rating} / 5` : ratingAverage === null ? 'No community ratings yet' : `${ratingAverage.toFixed(1)} / 5 community average`}</p>
         </article>
       </section>
 

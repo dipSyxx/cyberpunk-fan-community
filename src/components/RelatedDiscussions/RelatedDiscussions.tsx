@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
-import { discussionHasSpoilers, discussions, hideSpoilersKey } from '../../data/discussions'
-import { readStoredValue } from '../../hooks/useLocalStorage'
+import { useCommunity } from '../../api/communityContext'
 import { GlitchContent } from '../Button/GlitchContent'
 
 interface RelatedDiscussionsProps {
@@ -12,6 +11,7 @@ export function RelatedDiscussions({
   favoriteCharacterIds = [],
   savedDistrictIds = [],
 }: RelatedDiscussionsProps) {
+  const { site: { discussions, profile } } = useCommunity()
   const relatedDiscussions = discussions.filter(({ characterId, districtId }) =>
     (characterId && favoriteCharacterIds.includes(characterId)) ||
     (districtId && savedDistrictIds.includes(districtId)),
@@ -19,7 +19,7 @@ export function RelatedDiscussions({
 
   if (relatedDiscussions.length === 0) return null
 
-  const hideSpoilers = readStoredValue(hideSpoilersKey, true)
+  const hideSpoilers = profile?.hideSpoilers ?? true
 
   return (
     <section aria-label="Related discussions" className="related-discussions">
@@ -29,7 +29,7 @@ export function RelatedDiscussions({
           <li key={discussion.id}>
             <Link to={`/community?thread=${encodeURIComponent(discussion.id)}`}>
               <GlitchContent>
-                {hideSpoilers && discussionHasSpoilers(discussion) ? 'Hidden story discussion' : discussion.title}
+                {hideSpoilers && discussion.spoiler ? 'Hidden story discussion' : discussion.title}
               </GlitchContent>
             </Link>
           </li>

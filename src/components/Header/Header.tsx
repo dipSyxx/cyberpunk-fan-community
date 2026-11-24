@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { localAuthKey, LocalAuthError, logOutLocally, readLocalUsername } from '../../data/localAuth'
+import { useCommunity } from '../../api/communityContext'
+import { errorMessage } from '../../api/transport'
 import { useTransientStatus } from '../../hooks/useTransientStatus'
 import { AccountControls } from '../Auth/AccountControls'
 import { AuthDialog, type AuthMode } from '../Auth/AuthDialog'
@@ -20,23 +21,16 @@ const desktopNavigationItems = navigationItems.filter(
 )
 
 export function Header() {
+  const { authenticate, site: { profile } } = useCommunity()
   const [menuOpen, setMenuOpen] = useState(false)
   const [authMode, setAuthMode] = useState<AuthMode | null>(null)
-  const [username, setUsername] = useState(readLocalUsername)
+  const username = profile?.username ?? null
   const [signingOut, setSigningOut] = useState(false)
   const desktopNavRef = useRef<HTMLElement>(null)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const restoreFocusRef = useRef<HTMLButtonElement | null>(null)
   const { status, showStatus } = useTransientStatus()
   const closeMenu = useCallback(() => setMenuOpen(false), [])
-
-  useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === localAuthKey || event.key === null) setUsername(readLocalUsername())
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
 
   useEffect(() => {
     const opener = restoreFocusRef.current
@@ -58,9 +52,8 @@ export function Header() {
   }
 
   const finishAuth = () => {
-    setUsername(readLocalUsername())
     setAuthMode(null)
-    showStatus(authMode === 'register' ? 'Local account created.' : 'Logged in.')
+    showStatus(authMode === 'register' ? 'Account created.' : 'Logged in.')
   }
 
   const signOut = async (trigger: HTMLButtonElement) => {
@@ -68,12 +61,11 @@ export function Header() {
     restoreFocusRef.current = menuOpen ? menuButtonRef.current : trigger
     setSigningOut(true)
     try {
-      await logOutLocally(username)
+      await authenticate('logout')
       showStatus('Logged out.')
     } catch (error) {
-      showStatus(error instanceof LocalAuthError ? error.message : 'Could not log out. Please try again.')
+      showStatus(errorMessage(error))
     } finally {
-      setUsername(readLocalUsername())
       setSigningOut(false)
       closeMenu()
     }

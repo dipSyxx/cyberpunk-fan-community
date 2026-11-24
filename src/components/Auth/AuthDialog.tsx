@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import {
-  LocalAuthError, logInLocally, passwordMaxLength, passwordMinLength,
-  registerLocalAccount, usernameMaxLength, usernameMinLength,
-} from '../../data/localAuth'
+import { useCommunity } from '../../api/communityContext'
+import { errorMessage } from '../../api/transport'
 import { ActionButton } from '../Button/Button'
 import { GlitchContent } from '../Button/GlitchContent'
 
 export type AuthMode = 'login' | 'register'
+const passwordMinLength = 12
+const passwordMaxLength = 128
+const usernameMinLength = 3
+const usernameMaxLength = 24
 
 interface AuthDialogProps {
   mode: AuthMode
@@ -16,6 +18,7 @@ interface AuthDialogProps {
 }
 
 export function AuthDialog({ mode, onChangeMode, onClose, onAuthenticated }: AuthDialogProps) {
+  const { authenticate } = useCommunity()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const usernameRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
@@ -54,11 +57,10 @@ export function AuthDialog({ mode, onChangeMode, onClose, onAuthenticated }: Aut
     setError('')
     setBusy(true)
     try {
-      if (registering) await registerLocalAccount(username, password)
-      else await logInLocally(username, password)
+      await authenticate(mode, { username, password })
       onAuthenticated()
     } catch (error) {
-      setError(error instanceof LocalAuthError ? error.message : 'Could not finish. Please try again.')
+      setError(errorMessage(error))
     } finally {
       setBusy(false)
     }
@@ -90,7 +92,7 @@ export function AuthDialog({ mode, onChangeMode, onClose, onAuthenticated }: Aut
             <GlitchContent>Close</GlitchContent>
           </button>
         </header>
-        <p id="auth-dialog-description">Local accounts are stored in this browser.</p>
+        <p id="auth-dialog-description">Sign in to save your Night City activity to your account.</p>
         <form className="journal-form auth-dialog__form" key={mode} onSubmit={submit}>
           <label className="journal-field">
             Username
@@ -134,7 +136,7 @@ export function AuthDialog({ mode, onChangeMode, onClose, onAuthenticated }: Aut
           </ActionButton>
         </form>
         <button className="auth-dialog__switch" disabled={busy} onClick={changeMode} type="button">
-          <GlitchContent>{registering ? 'Already have an account? Log in' : 'Create a local account'}</GlitchContent>
+          <GlitchContent>{registering ? 'Already have an account? Log in' : 'Create an account'}</GlitchContent>
         </button>
       </div>
     </dialog>

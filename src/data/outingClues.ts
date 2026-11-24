@@ -1,6 +1,5 @@
-import { districts } from './districts'
-import type { Outing, OutingStop } from './outings'
-import { makeShareLink, readShareId, readShareJson, readShareObject, readShareText, shareParams, shareTextLimit, shareTitleLimit } from './shareLinks'
+import type { District, Outing, OutingStop } from '../../shared/community'
+import { readShareId, readShareJson, readShareObject, readShareText, shareParams, shareTextLimit, shareTitleLimit } from './shareLinks'
 
 export const clueTitleLimit = shareTitleLimit
 export const clueHintLimit = shareTextLimit
@@ -13,7 +12,7 @@ function readStop(id: unknown, title: unknown, prompt: unknown): OutingStop | nu
   return clueId && clueTitle && cluePrompt ? { id: `fan-${clueId}`, title: clueTitle, prompt: cluePrompt } : null
 }
 
-export function readOutingClue(hash: string): Outing | null {
+export function readOutingClue(hash: string, districts: District[]): Outing | null {
   const params = shareParams(hash)
   const stop = readStop(params.get('clue'), params.get('title'), params.get('hint'))
   const districtId = params.get('district')
@@ -34,19 +33,4 @@ export function readOutingClue(hash: string): Outing | null {
   }
 
   return { ...stop, districtId, previousStops }
-}
-
-export function shareOutingClue({ id, districtId, title, prompt, previousStops }: Outing) {
-  const params = new URLSearchParams({
-    clue: id,
-    district: districtId,
-    title,
-    hint: prompt,
-  })
-  if (previousStops?.length) params.set('trail', JSON.stringify(previousStops))
-  return makeShareLink('/', params)
-}
-
-export function makeOutingClueLink(districtId: string, title: string, hint: string, previousStops: OutingStop[]) {
-  return shareOutingClue({ id: `fan-${crypto.randomUUID()}`, districtId, title, prompt: hint, previousStops })
 }

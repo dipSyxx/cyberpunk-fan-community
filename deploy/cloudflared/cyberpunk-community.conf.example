@@ -1,0 +1,36 @@
+Listen 127.0.0.1:3081 http
+
+<VirtualHost 127.0.0.1:3081>
+    ServerName 127.0.0.1
+    ServerAlias cyberpunk-tunnel.internal
+    ProxyRequests Off
+    ProxyPass /api/ http://127.0.0.1:3001/api/
+    ProxyPassReverse /api/ http://127.0.0.1:3001/api/
+    <Location /api/>
+        <RequireAll>
+            Require local
+            # cloudflared verifies the Access JWT before sending a request with this Host.
+            <RequireAny>
+                Require expr "req_novary('Host') != 'cyberpunk-tunnel.internal'"
+                <RequireAll>
+                    Require expr "-n req_novary('Cf-Access-Jwt-Assertion')"
+                    <RequireAny>
+                        Require expr "req_novary('X-Real-IP') =~ m#^([0-9]{1,3}[.]){3}[0-9]{1,3}$# && (req_novary('X-Real-IP') -ipmatch '0.0.0.0/1' || req_novary('X-Real-IP') -ipmatch '128.0.0.0/1')"
+                        Require expr "req_novary('X-Real-IP') =~ m#^[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]*$# && (req_novary('X-Real-IP') -ipmatch '::/1' || req_novary('X-Real-IP') -ipmatch '8000::/1')"
+                    </RequireAny>
+                </RequireAll>
+            </RequireAny>
+        </RequireAll>
+        RequestHeader set X-Cyberpunk-Proxy-Client-IP "expr=%{REMOTE_ADDR}"
+        RequestHeader set X-Cyberpunk-Proxy-Client-IP "expr=%{req:X-Real-IP}" "expr=req_novary('Host') == 'cyberpunk-tunnel.internal'"
+        RequestHeader unset CF-Access-Client-Id
+        RequestHeader unset CF-Access-Client-Secret
+        RequestHeader unset Cf-Access-Jwt-Assertion
+        RequestHeader unset X-Real-IP
+    </Location>
+    <LocationMatch "^/(?!api/)">
+        Require all denied
+    </LocationMatch>
+    ErrorLog ${APACHE_LOG_DIR}/cyberpunk-community-error.log
+    CustomLog ${APACHE_LOG_DIR}/cyberpunk-community-access.log combined
+</VirtualHost>

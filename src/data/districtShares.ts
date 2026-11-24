@@ -1,6 +1,7 @@
-import { districtJournalPath, readJournalEntry, type DistrictJournalEntry } from './districtJournal'
-import { readInGameTime, type InGameTime } from './outings'
-import { makeShareLink, readShareId, readShareJson, readShareObject, readShareText, shareParams, shareTitleLimit } from './shareLinks'
+import type { Collection, FindingObservation, FindingRequest, FindingResult, SharedFinding } from '../../shared/community'
+import { readJournalEntry, type DistrictJournalEntry } from './districtJournal'
+import { readInGameTime } from './outings'
+import { readShareId, readShareJson, readShareObject, readShareText, shareParams, shareTitleLimit } from './shareLinks'
 
 export const findingPlaceLimit = 120
 export const districtCollectionLimit = 3
@@ -11,35 +12,7 @@ export const findingResults = {
   notFound: 'Could not find it',
 }
 
-export interface FindingRequest {
-  id: string
-  note: string
-  place: string
-  time: InGameTime
-}
-
-export interface FindingReport extends Pick<DistrictJournalEntry, 'id' | 'note' | 'createdAt'> {
-  result: keyof typeof findingResults
-  time: InGameTime
-}
-
-export interface FindingCheck {
-  request: FindingRequest
-  reports: FindingReport[]
-}
-
-export interface SharedFinding {
-  request: FindingRequest
-  report?: FindingReport
-}
-
-export interface DistrictCollection {
-  id: string
-  title: string
-  entries: DistrictJournalEntry[]
-}
-
-export function readFindingResult(value: unknown): FindingReport['result'] | null {
+export function readFindingResult(value: unknown): FindingResult | null {
   return value === 'confirmed' || value === 'different' || value === 'notFound' ? value : null
 }
 
@@ -52,12 +25,12 @@ function readFindingRequest(value: unknown): FindingRequest | null {
   return id && note && place && time ? { id, note, place, time } : null
 }
 
-function readFindingReport(value: unknown): FindingReport | null {
+function readFindingReport(value: unknown): FindingObservation | null {
   const report = readShareObject(value)
   const entry = readJournalEntry(value)
   const result = readFindingResult(report?.result)
   const time = readInGameTime(report?.time)
-  return entry && result && time ? { ...entry, result, time } : null
+  return entry && result && time ? { ...entry, sourceId: entry.id, result, time } : null
 }
 
 function readDistrictShare(hash: string, parameter: string, districtId: string) {
@@ -69,13 +42,13 @@ export function readSharedFinding(hash: string, districtId: string): SharedFindi
   const value = readDistrictShare(hash, 'finding', districtId)
   const request = readFindingRequest(value?.request)
   if (!request) return null
-  if (value?.report === undefined) return { request }
+  if (value?.report === undefined) return { districtId, request }
 
   const report = readFindingReport(value.report)
-  return report ? { request, report } : null
+  return report ? { districtId, request, report } : null
 }
 
-export function readSharedCollection(hash: string, districtId: string): DistrictCollection | null {
+export function readSharedCollection(hash: string, districtId: string): Collection | null {
   const value = readDistrictShare(hash, 'collection', districtId)
   const id = readShareId(value?.id)
   const title = readShareText(value?.title, shareTitleLimit)
@@ -90,26 +63,4 @@ export function readSharedCollection(hash: string, districtId: string): District
     entries.push(entry)
   }
   return { id, title, entries }
-}
-
-function makeDistrictShareLink(districtId: string, parameter: string, payload: SharedFinding | DistrictCollection) {
-  return makeShareLink(districtJournalPath(districtId), new URLSearchParams({
-    [parameter]: JSON.stringify({ version: 1, districtId, payload }),
-  }))
-}
-
-export function makeFindingLink(districtId: string, request: FindingRequest, report?: FindingReport) {
-  return makeDistrictShareLink(districtId, 'finding', { request, report })
-}
-
-export function makeCollectionLink(districtId: string, { id, title, entries }: DistrictCollection) {
-  return makeDistrictShareLink(districtId, 'collection', {
-    id,
-    title,
-    entries: entries.map(({ id, note, createdAt }) => ({ id, note, createdAt })),
-  })
-}
-
-export function sameFinding(first: FindingRequest, second: FindingRequest) {
-  return first.id === second.id && first.note === second.note && first.place === second.place && first.time === second.time
 }

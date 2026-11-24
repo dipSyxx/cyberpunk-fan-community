@@ -1,0 +1,12 @@
+{
+  // Merge these entries into the existing policy after reviewing existing Funnel targets.
+  "tagOwners": {
+    "tag:cyberpunk-funnel": [],
+  },
+  "nodeAttrs": [
+    {
+      "target": ["tag:cyberpunk-funnel"],
+      "attr": ["funnel"],
+    },
+  ],
+}

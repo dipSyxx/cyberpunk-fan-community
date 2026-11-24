@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from './components/Header/Header'
+import { CommunityProvider } from './api/CommunityProvider'
+import { useCommunity } from './api/communityContext'
 import { Characters } from './pages/Characters/Characters'
 import { Community } from './pages/Community/Community'
 import { DistrictJournal } from './pages/DistrictJournal/DistrictJournal'
@@ -17,14 +19,15 @@ function ScrollToTop() {
   return null
 }
 
-function App() {
+function CommunityRoutes() {
+  const { site: { profile } } = useCommunity()
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
       <div className="app-frame">
         <Header />
         <main id="main-content">
-          <Routes>
+          <Routes key={profile?.username ?? 'guest'}>
             <Route path="/" element={<Home />} />
             <Route path="/characters" element={<Characters />} />
             <Route path="/night-city" element={<NightCity />} />
@@ -34,8 +37,12 @@ function App() {
           </Routes>
         </main>
       </div>
-    </BrowserRouter>
+    </>
   )
+}
+
+function App() {
+  return <BrowserRouter><CommunityProvider><CommunityRoutes /></CommunityProvider></BrowserRouter>
 }
 
 export default App

@@ -1,0 +1,19 @@
+[Unit]
+Description=Cyberpunk Community Cloudflare Tunnel
+Wants=network-online.target
+After=network-online.target apache2.service
+
+[Service]
+ExecStart=/usr/bin/cloudflared tunnel --config /etc/cloudflared/cyberpunk.yml --no-autoupdate run
+DynamicUser=yes
+LoadCredential=tunnel.json:/etc/cloudflared/cyberpunk-tunnel.json
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,13 +1,9 @@
 import { readShareId, readShareObject, readShareText, shareTextLimit } from './shareLinks'
+import type { JournalEntry } from '../../shared/community'
 
 export const journalNoteLimit = shareTextLimit
 
-export interface DistrictJournalEntry {
-  id: string
-  note: string
-  createdAt: string
-  imported?: boolean
-}
+export type DistrictJournalEntry = JournalEntry
 
 interface DistrictJournalFile {
   version: 1

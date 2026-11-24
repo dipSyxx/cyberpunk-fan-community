@@ -1,52 +1,23 @@
-import { useLocalStorage } from '../../hooks/useLocalStorage'
+import type { PollOption } from '../../../shared/community'
+import { useCommunity } from '../../api/communityContext'
+import { errorMessage } from '../../api/transport'
 import { GlitchContent } from '../Button/GlitchContent'
 
-interface ReactionButtonProps {
-  storageKey: string
-  initialCount: number
-  label: string
-  activeLabel: string
-  symbol?: string
-  compactCount?: boolean
-  className?: string
-}
-
-export function ReactionButton({
-  storageKey,
-  initialCount,
-  label,
-  activeLabel,
-  symbol = '♥',
-  compactCount = false,
-  className = '',
-}: ReactionButtonProps) {
-  const [active, setActive] = useLocalStorage(
-    `cyberpunk:reaction:${storageKey}`,
-    false,
-  )
-  const currentLabel = active ? activeLabel : label
-  const count = initialCount + Number(active)
-  const formattedCount = compactCount
-    ? `${new Intl.NumberFormat('en', {
-        notation: 'compact',
-        maximumFractionDigits: 1,
-      })
-        .format(initialCount)
-        .toUpperCase()}${active ? '+1' : ''}`
-    : count.toLocaleString('en')
-
+export function ReactionButton({ option, onError }: { option: PollOption, onError: (message: string) => void }) {
+  const { mutate } = useCommunity()
+  const count = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(option.total)
   return (
     <button
-      aria-label={`${currentLabel}. ${count.toLocaleString()} total`}
-      aria-pressed={active}
-      className={`reaction-button${active ? ' is-active' : ''} ${className}`.trim()}
-      onClick={() => setActive((current) => !current)}
+      aria-label={`${option.label}. ${option.total.toLocaleString()} total`}
+      aria-pressed={option.selected}
+      className={`reaction-button${option.selected ? ' is-active' : ''}`}
+      onClick={() => void mutate('vote', { id: option.id, selected: !option.selected }, 'site').catch((error: unknown) => onError(errorMessage(error)))}
       type="button"
     >
       <GlitchContent>
-        <span aria-hidden="true">{symbol}</span>
-        <span>{currentLabel}</span>
-        <strong>{formattedCount}</strong>
+        <span aria-hidden="true">{option.symbol === 'star' ? '★' : '♥'}</span>
+        <span>{option.label}</span>
+        <strong>{count}</strong>
       </GlitchContent>
     </button>
   )
